@@ -1,6 +1,0 @@
-# print('Hello, world!')
-
-favorite_food = 'pizza'
-food_output = f'Your favorite food is {favorite_food}.'
-
-print(food_output)
