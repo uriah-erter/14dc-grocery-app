@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2025-05-05
+
+### Added
+
+- exercises for loops, conditional statements, and error handling
+
 ## [0.2.0] - 2025-05-05
 
 ### Added
