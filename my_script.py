@@ -84,3 +84,202 @@
 # **************************************************************
 # **************************************************************
 
+# # ** day_4 Exercise 1: Grocery Item Categorization Using Conditional Statements
+# food_items = ['apple', 'bread', 'milk']
+# non_food_items = ['soap', 'detergent', 'paper towel']
+
+# grocery_item = input('Please add an item: ')
+
+# if grocery_item in food_items:
+#     print('Food item')
+
+# elif grocery_item in non_food_items:
+#     print('Non-food Item')
+
+# else:
+#     print('Unknown Item')
+
+# **************************************************************
+# **************************************************************
+
+# # ** day_4 Exercise 2: GMaking a Burger with a While Loop
+# items_list = [
+#     {'name':'fries', 'cost':6.25, 'amount':1},
+#     {'name':'burger patties', 'cost':13.50, 'amount':1},
+#     {'name':'burger buns', 'cost':3.50, 'amount':2},
+#     {'name':'tomato', 'cost':1.50, 'amount':2},
+#     {'name':'lettuce', 'cost':5, 'amount':1},
+#     {'name':'Ketchup', 'cost':3.47, 'amount':1},
+#     {'name':'pickles', 'cost':4.25, 'amount':1}
+# ]
+
+# shopping_list = []
+
+# budget = 27.50
+# total_cost = 0
+# index = 0
+
+# while total_cost <= budget:
+#     item = items_list[index]
+#     shopping_list.append(item['name'])
+#     total_cost += item['cost'] * item['amount']
+#     index += 1
+        
+# print(f'\nExpected output: {shopping_list}\n')
+
+# **************************************************************
+# **************************************************************
+
+# # ** day_4 Exercise 3: Extending Logic with Nesting
+# items_list = [
+#     {'name':'fries', 'cost':6.25, 'amount':1},
+#     {'name':'burger patties', 'cost':13.50, 'amount':1},
+#     {'name':'burger buns', 'cost':3.50, 'amount':2},
+#     {'name':'tomato', 'cost':1.50, 'amount':2},
+#     {'name':'lettuce', 'cost':5, 'amount':1},
+#     {'name':'Ketchup', 'cost':3.47, 'amount':1},
+#     {'name':'pickles', 'cost':4.25, 'amount':1}
+# ]
+
+# shopping_list = []
+
+# budget = 27.50
+# total_cost = 0
+# index = 0
+
+# print('\n')
+# while total_cost <= budget:
+#     item = items_list[index]
+#     shopping_list.append(item['name'])
+#     total_cost += item['cost'] * item['amount']
+#     index += 1
+    
+#     for i in shopping_list:
+#         print(i)
+        
+#     print('----------') 
+        
+    
+# print(f'{shopping_list}\n')
+
+# **************************************************************
+# **************************************************************
+
+# # ** day_4 Exercise 4: Breaking the Loop
+# items_list = [
+#     {'name':'fries', 'cost':6.25, 'amount':1},
+#     {'name':'burger patties', 'cost':13.50, 'amount':1},
+#     {'name':'burger buns', 'cost':3.50, 'amount':2},
+#     {'name':'tomato', 'cost':1.50, 'amount':2},
+#     {'name':'lettuce', 'cost':5, 'amount':1},
+#     {'name':'Ketchup', 'cost':3.47, 'amount':1},
+#     {'name':'pickles', 'cost':4.25, 'amount':1}
+# ]
+
+# shopping_list = []
+
+# budget = 27.50
+# total_cost = 0
+# index = 0
+
+# print('\n')
+# while total_cost <= budget:
+#     item = items_list[index]
+#     shopping_list.append(item['name'])
+#     total_cost += item['cost'] * item['amount']
+#     index += 1
+    
+#     for i in shopping_list:
+#         print(i)
+        
+#     print('----------')
+    
+#     if 'fries' in shopping_list and 'burger patties' in shopping_list and 'burger buns' in shopping_list:
+#         print(f'We can make burgers and fries for ${total_cost}!')
+#         break
+    
+# print(f'{shopping_list}\n')
+
+# **************************************************************
+# **************************************************************
+
+# # ** day_4 Exercise 5: Error Handling with Try-Except
+# items_list = [
+#     {'name':'fries', 'cost':6.25, 'amount':1},
+#     {'name':'burger patties', 'cost':13.50, 'amount':1},
+#     {'name':'burger buns', 'cost':3.50, 'amount':2},
+#     {'name':'tomato', 'cost':1.50, 'amount':2},
+#     {'name':'lettuce', 'cost':5, 'amount':1},
+#     {'name':'Ketchup', 'cost':3.47, 'amount':1},
+#     {'name':'pickles', 'cost':4.25, 'amount':1}
+# ]
+
+# shopping_list = []
+
+# budget = 27.50
+# total_cost = 0
+# index = 0
+
+# print('\n')
+# while total_cost <= budget:
+#     try:
+#         item = items_list[index]
+#         shopping_list.append(item['name'])
+#         total_cost += item['cost'] * item['amount']
+#         index += 1
+        
+#         for i in shopping_list:
+#             print(i)
+            
+#         print('----------')
+        
+#         if 'fries' in shopping_list and 'burger patties' in shopping_list and 'burger buns' in shopping_list:
+#             print(f'We can make burgers and fries for ${total_cost}!')
+#             break
+    
+#     except:
+#         print(f'ERROR: The index must be an integer.')
+        
+# print(f'{shopping_list}\n')
+
+# **************************************************************
+# **************************************************************
+
+# ** day_4 Exercise 6: Customize Your Script
+items_list = [
+    {'name':'top sirloin', 'cost':14.29, 'amount':1},
+    {'name':'egg noodles', 'cost':4.26, 'amount':1},
+    {'name':'seasoning mix', 'cost':2.07, 'amount':1},
+    {'name':'tomato', 'cost':1.50, 'amount':2},
+    {'name':'lettuce', 'cost':5, 'amount':1},
+    {'name':'Ketchup', 'cost':3.47, 'amount':1},
+    {'name':'pickles', 'cost':4.25, 'amount':1}
+]
+
+shopping_list = []
+
+budget = 27.50
+total_cost = 0
+index = 0
+
+print('\n')
+while total_cost <= budget:
+    try:
+        item = items_list[index]
+        shopping_list.append(item['name'])
+        total_cost += item['cost'] * item['amount']
+        index += 1
+        
+        for i in shopping_list:
+            print(i)
+            
+        print('----------')
+        
+        if 'top sirloin' in shopping_list and 'egg noodles' in shopping_list and 'seasoning mix' in shopping_list:
+            print(f'We can make beef stroganoff for ${total_cost:.2f}!')
+            break
+    
+    except IndexError:
+        print(f'ERROR: The index must be an integer.')
+        
+print(f'{shopping_list}\n')
