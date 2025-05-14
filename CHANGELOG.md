@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0] - 2025-05-14
+
+### Added
+
+- app_core.py: add functions to add, edit, list, and remove items from a grocery list
+- app_launch.py: add function to interact with user to add, edit, list, and remove items from a grocery list
+
+### Removed
+
+- my_first_script.py
+
 ## [0.3.0] - 2025-05-05
 
 ### Added
