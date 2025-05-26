@@ -201,9 +201,17 @@ def list_items():
     """
     Prints all items in the grocery list.
     """
-    for item in grocery_list:
-        item_without_id = {key: value for key, value in item.items() if key != "id"}  # Remove "id"
-        print(item_without_id)
+    for match_num, item in enumerate(grocery_list, start=1):
+        match_string = (
+            f"{match_num}. "
+            f"Name: {item["name"]}, "
+            f"Store: {item["store"]}, "
+            f"Cost: {item["cost"]}, "
+            f"Amount: {item["amount"]}, "
+            f"Priority: {item["priority"]}, "
+            f"Buy: {item["buy"]}"
+        )
+        print(match_string)    
 
 def export_items():
     """
@@ -212,26 +220,20 @@ def export_items():
     buy_list = [item for item in grocery_list if item['buy']]
 
     if buy_list:
-        for item in buy_list:
-            print(f"name: {item['name']} - store: {item['store']} - cost: ${item['cost']} - amount: {item['amount']} - priority: {item['priority']}")
+        for match_num, item in enumerate(buy_list, start=1):
+            match_string = (
+                f"{match_num}. "
+                f"Name: {item["name"]}, "
+                f"Store: {item["store"]}, "
+                f"Cost: {item["cost"]}, "
+                f"Amount: {item["amount"]}, "
+                f"Priority: {item["priority"]}, "
+                f"Buy: {item["buy"]}"
+            )
+            print(match_string)
         
         total_cost = calculate_total_cost(buy_list, round_cost=True)
-        print(f'Total cost: ${total_cost:.2f}')
-
-def search_item(name):
-    """
-    Searches for an item in the grocery list by name and prints its details.
-    
-    Args:
-        name (str): Name of the item to search for.
-    """
-    index = get_index_from_name(name)
-    
-    if index is not None:
-        item = grocery_list[index]        
-        print(f"name: {item['name']} - store: {item['store']} - cost: ${item['cost']} - amount: {item['amount']} - priority: {item['priority']}")
-    else:
-        print('Item not found.')
+        print(f'\nTotal cost: ${total_cost:.2f}')
 
 def search_item_name(search_item):
     """Search for items in the grocery list based on a given keyword."""
@@ -243,3 +245,4 @@ def search_item_name(search_item):
             matching_items.append(item)  # Add matching items to the list
     
     return matching_items
+

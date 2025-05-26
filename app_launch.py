@@ -67,40 +67,38 @@ def  handle_add_command():
         priority=priority,
         buy=buy    
     )
-    print(f'Item was added to the grocery list.')
+    print(f'\nItem was added to the grocery list.')
 
 def handle_remove_command():
     name = input("\nEnter the item name to remove: ")
+    print('')
     matches = app_core.search_item_name(name)
 
     if not matches:
-        print(f'\nI\'m sorry, I could not find a match for \'{name}.\'')
+        print(f'I\'m sorry, I could not find a match for \'{name}.\'')
 
     elif len(matches) > 1:
-        match_number = 1  
-
-        for item in matches:
-            item_without_id = {key: value for key, value in item.items() if key != 'id'}
-            print(
-                f"{match_number}: Name: {item_without_id['name']}, "
-                f"Store: {item_without_id['store']}, Cost: ${item_without_id['cost']}, "
-                f"Amount: {item_without_id['amount']}, Priority: {item_without_id['priority']}"
+        for match_num, match in enumerate(matches, start=1):
+            match_string = (
+                f"{match_num}. "
+                f"| Name: {match["name"]} "
+                f"| Store: {match["store"]} "
+                f"| Cost: {match["cost"]} "
+                f"| Amount: {match["amount"]} "
+                f"| Priority: {match["priority"]} "
+                f"| Buy: {match["buy"]} |"
             )
-            match_number += 1
-
+            print(match_string)
+    
         item_num = input('\nPlease select the number you would lke to remove: ')
         match_item = matches[int(item_num) - 1]
-
-        index = app_core.get_index_from_id(id)  
         app_core.remove_item(name, id=match_item['id'])
-        print('That item has been removed.\n')
-        
+        print(f'\nItem {match_num} has been removed.')
 
     else:
         match_item = matches[0]
-        index = app_core.get_index_from_id(id)
         app_core.remove_item(name, id=match_item['id'])
-        print('That item has been removed.\n')
+        print(f'That item has been removed.')
 
 def handle_edit_command():
     target_item = input('\nWhat item would you like to edit: ')
@@ -108,36 +106,33 @@ def handle_edit_command():
     matches = app_core.search_item_name(target_item)
 
     if not matches:
-        print(f'\nI\'m sorry, I could not find a match for \'{edit_keyword}.\'\n')
+        print(f'\nI\'m sorry, I could not find a match for \'{target_item}.\'\n')
 
     elif len(matches) > 1:
-        match_number = 1
-
-        for item in matches:
-            item_without_id = {key: value for key, value in item.items() if key != 'id'}
-            print(
-                f"{match_number}: Name: {item_without_id['name']}, "
-                f"Store: {item_without_id['store']}, Cost: ${item_without_id['cost']}, "
-                f"Amount: {item_without_id['amount']}, Priority: {item_without_id['priority']}"
+        for match_num, match in enumerate(matches, start=1):
+            match_string = (
+                f"{match_num}. "
+                f"| name: {match["name"]} "
+                f"| store: {match["store"]} "
+                f"| cost: {match["cost"]} "
+                f"| amount: {match["amount"]} "
+                f"| priority: {match["priority"]} "
+                f"| buy: {match["buy"]}"
             )
-            match_number += 1
+            print(match_string)
 
-        item_num = input('\nPlease select the number you would lke to edit: ')
+        item_num = input('\nPlease select the number you would like to edit: ')
         match_item = matches[int(item_num) - 1]
-
         name, store, cost, amount, priority, buy = get_inputs()
-        index = app_core.get_index_from_id(id)
         app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
     
     else:
         match_item = matches[0]
         name, store, cost, amount, priority, buy = get_inputs()
-        index = app_core.get_index_from_id(id)
         app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
 
 def handle_list_command():
     print("\nThese are the current items in the grocery list.\n")
-    print("Generating your list of items...\n")
     app_core.list_items()
 
 
@@ -148,24 +143,24 @@ def handle_export_command():
 def handle_search_command():
     """Prompt user for a search keyword and display matching items."""
 
-    search_keyword = input("What is the name of the item you would like to search? ")
-    print("\nSearching for matching items...\n")
-    
+    search_keyword = input("\nWhat is the name of the item you would like to search? ")
     matches = app_core.search_item_name(search_keyword)  # Call search function
 
     if matches:
-        print("These items match your search:\n")
-        for item in matches:
-            print(f"Name: {item['name']}")
-            print(f"Store: {item['store']}")
-            print(f"Cost: ${item['cost']:.2f}")
-            print(f"Amount: {item['amount']}")
-            print(f"Priority: {item['priority']}")
-            print(f"Buy: {'Yes' if item['buy'] else 'No'}")
-            print("-" * 30)  # Separator for readability
+        for match_num, match in enumerate(matches, start=1):
+            match_string = (
+                f"{match_num}. "
+                f"| name: {match["name"]} "
+                f"| store: {match["store"]} "
+                f"| cost: {match["cost"]} "
+                f"| amount: {match["amount"]} "
+                f"| priority: {match["priority"]} "
+                f"| buy: {match["buy"]}"
+            )
+            print(match_string)
+
     else:
         print("No items match the provided search keyword.")
-
 
 def get_inputs():
     """
@@ -182,7 +177,7 @@ def get_inputs():
     """
 
     while True:
-        name = input("item name: ").strip()
+        name = input("\nitem name: ")
 
         if name:
             break
