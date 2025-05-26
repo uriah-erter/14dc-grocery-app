@@ -12,48 +12,159 @@ def launch():
 
     while True:
         command = input(
-            "\nEnter a command (add, remove, edit, list, export, " "search, quit): "
+            "\nEnter a command (add, remove, edit, list, export, search, or quit): "
         )
 
         if command == "add":
-            print(
-                "\nEnter the following information. After entering the name, "
-                'enter the rest of the information or type "skip" to skip '
-                "any of the remaining fields."
-            )
-            name, store, cost, amount, priority, buy = get_inputs()
-            app_core.add_item(
-                name=name,
-                store=store,
-                cost=cost,
-                amount=amount,
-                priority=priority,
-                buy=buy,
-            )
+
+            # Add an item to the grocery list
+            handle_add_command()
 
         elif command == "remove":
-            name = input("\nEnter the item name to remove: ")
-            app_core.remove_item(name)
+
+            # Remove an item from the grocery list
+            handle_remove_command()
 
         elif command == "edit":
-            print("\nEnter the name of the item you want to edit.")
-            name, store, cost, amount, priority, buy = get_inputs()
-            app_core.edit_item(name, store, cost, amount, priority, buy)
+            
+            # Edit an item in the grocery list
+            handle_edit_command()
 
         elif command == "list":
-            print("\nThese are the current items in the grocery list.\n")
-            app_core.list_items()
+
+            # Prints all the items in the grocery list
+            handle_list_command()
 
         elif command == "export":
-            print("\nThese are the current items marked to buy.")
-            app_core.export_items()
+
+            # Prints items marked for 'buy' in the grocery list
+            handle_export_command()
 
         elif command == "search":
-            name = input("\nEnter the item name to search: ")
-            app_core.search_item(name)
+
+            # Searches for items in the grocery list
+            handle_search_command()
 
         elif command == "quit":
             break
+
+def  handle_add_command():
+    """
+    Handles the logic triggered by the add command in command line mode.
+    Adds an item to the grocery list.
+    """
+    print("\nEnter the following information:")
+    
+    # Get the inputs from the user
+    name, store, cost, amount, priority, buy = get_inputs()
+
+    # Add the item to the grocery list
+    app_core.add_item(
+        name=name,
+        store=store,
+        cost=cost,
+        amount=amount,
+        priority=priority,
+        buy=buy    
+    )
+    print(f'Item was added to the grocery list.')
+
+def handle_remove_command():
+    name = input("\nEnter the item name to remove: ")
+    matches = app_core.search_item_name(name)
+
+    if not matches:
+        print(f'\nI\'m sorry, I could not find a match for \'{name}.\'')
+
+    elif len(matches) > 1:
+        match_number = 1  
+
+        for item in matches:
+            item_without_id = {key: value for key, value in item.items() if key != 'id'}
+            print(
+                f"{match_number}: Name: {item_without_id['name']}, "
+                f"Store: {item_without_id['store']}, Cost: ${item_without_id['cost']}, "
+                f"Amount: {item_without_id['amount']}, Priority: {item_without_id['priority']}"
+            )
+            match_number += 1
+
+        item_num = input('\nPlease select the number you would lke to remove: ')
+        match_item = matches[int(item_num) - 1]
+
+        index = app_core.get_index_from_id(id)  
+        app_core.remove_item(name, id=match_item['id'])
+        print('That item has been removed.\n')
+        
+
+    else:
+        match_item = matches[0]
+        index = app_core.get_index_from_id(id)
+        app_core.remove_item(name, id=match_item['id'])
+        print('That item has been removed.\n')
+
+def handle_edit_command():
+    target_item = input('\nWhat item would you like to edit: ')
+    print("\nRetrieving your matching items...\n")
+    matches = app_core.search_item_name(target_item)
+
+    if not matches:
+        print(f'\nI\'m sorry, I could not find a match for \'{edit_keyword}.\'\n')
+
+    elif len(matches) > 1:
+        match_number = 1
+
+        for item in matches:
+            item_without_id = {key: value for key, value in item.items() if key != 'id'}
+            print(
+                f"{match_number}: Name: {item_without_id['name']}, "
+                f"Store: {item_without_id['store']}, Cost: ${item_without_id['cost']}, "
+                f"Amount: {item_without_id['amount']}, Priority: {item_without_id['priority']}"
+            )
+            match_number += 1
+
+        item_num = input('\nPlease select the number you would lke to edit: ')
+        match_item = matches[int(item_num) - 1]
+
+        name, store, cost, amount, priority, buy = get_inputs()
+        index = app_core.get_index_from_id(id)
+        app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
+    
+    else:
+        match_item = matches[0]
+        name, store, cost, amount, priority, buy = get_inputs()
+        index = app_core.get_index_from_id(id)
+        app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
+
+def handle_list_command():
+    print("\nThese are the current items in the grocery list.\n")
+    print("Generating your list of items...\n")
+    app_core.list_items()
+
+
+def handle_export_command():
+    print("\nThese are the current items marked to buy.")
+    app_core.export_items()
+
+def handle_search_command():
+    """Prompt user for a search keyword and display matching items."""
+
+    search_keyword = input("What is the name of the item you would like to search? ")
+    print("\nSearching for matching items...\n")
+    
+    matches = app_core.search_item_name(search_keyword)  # Call search function
+
+    if matches:
+        print("These items match your search:\n")
+        for item in matches:
+            print(f"Name: {item['name']}")
+            print(f"Store: {item['store']}")
+            print(f"Cost: ${item['cost']:.2f}")
+            print(f"Amount: {item['amount']}")
+            print(f"Priority: {item['priority']}")
+            print(f"Buy: {'Yes' if item['buy'] else 'No'}")
+            print("-" * 30)  # Separator for readability
+    else:
+        print("No items match the provided search keyword.")
 
 
 def get_inputs():
