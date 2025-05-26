@@ -1,14 +1,66 @@
+import re
+import uuid
+
+
 # Grocery list containing predefined items with attributes such as name, store, cost, amount, priority, and buy status.
 grocery_list = [
-    {'name': 'milk', 'store': 'H.E.B.', 'cost': 3.19, 'amount': 1, 'priority': 1, 'buy': True},
-    {'name': 'eggs', 'store': 'H.E.B.', 'cost': 6.09, 'amount': 1, 'priority': 1, 'buy': True},
-    {'name': 'cheese', 'store': 'H.E.B.', 'cost': 4.46, 'amount': 1, 'priority': 1, 'buy': True},
-    {'name': 'steak', 'store': 'H.E.B.', 'cost': 12.79, 'amount': 1, 'priority': 1, 'buy': True},
-    {'name': 'chicken', 'store': 'H.E.B.', 'cost': 13.59, 'amount': 1, 'priority': 1, 'buy': True},
-    {'name': 'chips', 'store': 'H.E.B.', 'cost': 3.72, 'amount': 1, 'priority': 2, 'buy': False},
-    {'name': 'soda', 'store': 'H.E.B.', 'cost': 7.99, 'amount': 1, 'priority': 2, 'buy': False},
-    {'name': 'candy', 'store': 'H.E.B.', 'cost': 9.19, 'amount': 1, 'priority': 3, 'buy': False}
+    {'name': 'milk',
+     'store': 'H.E.B.',
+     'cost': 3.19,
+     'amount': 1,
+     'priority': 1,
+     'buy': True,
+     'id': 324148079480209640266124969462437015018
+     },
+    {'name': 'eggs',
+     'store': 'H.E.B.',
+     'cost': 6.09,
+     'amount': 1,
+     'priority': 1,
+     'buy': True,
+     'id': 197309914455992414179216031361480414011
+     },
+    {'name': 'cheese',
+     'store': 'H.E.B.',
+     'cost': 4.46,
+     'amount': 1,
+     'priority': 1,
+     'buy': True,
+     'id': 9479391863861648278192224790194635018
+     },
+    {'name': 'steak',
+     'store': 'H.E.B.',
+     'cost': 12.79, 
+     'amount': 1,
+     'priority': 1, 
+     'buy': True,
+     'id': 48600721663948687578776355804601712073
+    },
+    {'name': 'chicken',
+     'store': 'H.E.B.',
+     'cost': 13.59,
+     'amount': 1,
+     'priority': 1,
+     'buy': True,
+     'id': 314903496015975209550637873193073339410 
+     },
+     {'name': 'milk',
+     'store': 'H.E.B.',
+     'cost': 3.19,
+     'amount': 1,
+     'priority': 1,
+     'buy': True,
+     'id': 324148079480209640266124969462437015019
+     }
 ]
+
+def get_index_from_id(id):
+    index = 0
+    for item in grocery_list:
+        if item['id'] == id:
+            return index
+        else:
+            index += 1
 
 def calculate_total_cost(grocery_list, round_cost=False, tax=0.0825):
     """
@@ -37,15 +89,18 @@ def get_index_from_name(name):
     Returns the index of an item in the grocery list based on its name.
     
     Args:
-        name (str): Name of the item to search for.
+        name (str)): Name of the item to search for.
     
     Returns:
         int or None: Index of the item if found, otherwise None.
     """
-    for index, item in enumerate(grocery_list):
+    index = 0
+    
+    for item in grocery_list:
         if item['name'] == name:
             return index
-    return None  # Handle cases where item is not found
+        else:
+            index += 1
 
 def add_item(name, store, cost, amount, priority, buy):
     """
@@ -58,57 +113,97 @@ def add_item(name, store, cost, amount, priority, buy):
         amount (int): Quantity of the item.
         priority (int): Priority level (1-5).
         buy (bool): Whether the item is marked to buy.
+        id (int): Automatically generated.
     """
-    item = {'name': name, 'store': store, 'cost': cost, 'amount': amount, 'priority': priority, 'buy': buy}
+
+    # Generate a random UUID
+    unique_id = int(uuid.uuid4())
+
+    item = {'name': name, 
+            'store': store, 
+            'cost': cost, 
+            'amount': amount, 
+            'priority': priority, 
+            'buy': buy,
+            'id': unique_id
+            }
+    
     grocery_list.append(item)
 
-def remove_item(name):
+def remove_item(name: str, id: int):
     """
     Removes an item from the grocery list by name.
     
     Args:
-        name (str): Name of the item to remove.
+        id (int): Name of the item to remove.
     """
-    index = get_index_from_name(name)
-    if index is not None:
-        grocery_list.pop(index)
-    else:
-        print("Item not found.")
+    index = get_index_from_id(id)
+    grocery_list.pop(index)
 
-def edit_item(name, store=None, cost=None, amount=None, priority=None, buy="skip"):
+def edit_item(
+        name: str,
+        store: str | None=None,
+        cost: float | None=None,
+        amount: int | None=None,
+        priority: int | None=None,
+        buy: bool | bool="skip",
+        id: int | None=None
+        ) -> None:
     """
     Edits an existing item in the grocery list.
     
     Args:
-        name (str): Name of the item to edit.
-        store (str, optional): New store name.
-        cost (float, optional): New cost.
-        amount (int, optional): New quantity.
-        priority (int, optional): New priority level.
-        buy (bool or str, optional): Whether the item is marked to buy. Defaults to "skip".
+        name (str): The name of the item to edit.
+        store (str | None): Updated store name. Defaults to None.
+        cost (float | None): Updated cost. Defaults to None.
+        amount (int | None): Updated amount. Defaults to None.
+        priority (int | None): Updated priority. Defaults to None.
+        buy (str | bool): Updated buy status. Defaults to "skip".
+        id (str | None): Updated id.
     """
-    index = get_index_from_name(name)
-    if index is None:
-        print("Item not found.")
-        return  # Exit if item not found
-    
+    index = get_index_from_id(id)
     old_item = grocery_list[index]
 
-    grocery_list[index] = {
+    if not name:
+        name = old_item['name']
+
+    if not store:
+        store= old_item["store"]
+
+    if not cost:
+        cost= old_item["cost"]
+
+    if not amount:
+        amount = old_item["amount"]
+
+    if not priority:
+        priority = old_item["priority"]
+
+    if buy == "skip":
+        buy = old_item["buy"]
+
+    if not id:
+        id = old_item["id"]
+
+    item = {
         "name": name,
-        "store": store if store else old_item['store'],
-        "cost": cost if cost else old_item['cost'],
-        "amount": amount if amount else old_item['amount'],
-        "priority": priority if priority else old_item['priority'],
-        "buy": old_item['buy'] if buy == "skip" else buy
-    }
+        "store": store,
+        "cost": cost,
+        "amount": amount,
+        "priority": priority,
+        "buy": buy,
+        "id": id
+        }
+
+    grocery_list[index] = item
 
 def list_items():
     """
     Prints all items in the grocery list.
     """
     for item in grocery_list:
-        print(item)
+        item_without_id = {key: value for key, value in item.items() if key != "id"}  # Remove "id"
+        print(item_without_id)
 
 def export_items():
     """
@@ -121,7 +216,7 @@ def export_items():
             print(f"name: {item['name']} - store: {item['store']} - cost: ${item['cost']} - amount: {item['amount']} - priority: {item['priority']}")
         
         total_cost = calculate_total_cost(buy_list, round_cost=True)
-        print(f'Total cost: ${total_cost}')
+        print(f'Total cost: ${total_cost:.2f}')
 
 def search_item(name):
     """
@@ -137,3 +232,14 @@ def search_item(name):
         print(f"name: {item['name']} - store: {item['store']} - cost: ${item['cost']} - amount: {item['amount']} - priority: {item['priority']}")
     else:
         print('Item not found.')
+
+def search_item_name(search_item):
+    """Search for items in the grocery list based on a given keyword."""
+    matching_items = []  # Initialize an empty list to store matches
+    pattern = rf"^{search_item}"  # Create the search pattern
+    
+    for item in grocery_list:
+        if re.match(pattern, item['name'], re.IGNORECASE):  # Use re.match with case insensitivity
+            matching_items.append(item)  # Add matching items to the list
+    
+    return matching_items
