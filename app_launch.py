@@ -182,7 +182,7 @@ def get_inputs():
     """
 
     while True:
-        name = input("item name: ")
+        name = input("item name: ").strip()
 
         if name:
             break
