@@ -1,0 +1,13 @@
+EXPORT_PATH = '/Users/uriah.erter/14dc_dev/grocery_app_list'
+EXPORT_LIST = 'export_grocery_list.txt'
+GROCERY_LIST = 'grocery_list'
+NAME_DEFAULT = 'unnamed item'
+STORE_DEFAULT = 'Kroger'
+COST_DEFAULT = 0.00
+AMOUNT_DEFAULT = 1
+PRIORITY_DEFAULT = 1
+PRIORITY_MIN = 1
+PRIORITY_MAX = 5
+BUY_DEFAULT = 'True'
+BUY_TRUE = ['yes', 'true'] 
+BUY_FALSE = ['no', 'false']

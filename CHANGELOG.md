@@ -1,11 +1,18 @@
 # Changelog
 
+## [2.0.0] - 2025-05-30
+
+### Added
+
+- added an export function that writes to a JSON file
+- added a logging feature
+
 ## [1.1.0] - 2025-05-26
 
 ### Added
 
 - added the uuid and re libraries
-- collaped individual executable code into functions
+- collapsed individual executable code into functions
 
 ## [1.0.0] - 2025-05-14
 
