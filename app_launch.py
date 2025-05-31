@@ -1,4 +1,7 @@
 import app_core
+import log_config
+import constants
+import utils
 
 
 def launch():
@@ -8,12 +11,14 @@ def launch():
     The user can add, remove, edit, list, export, search for items, or quit
     the application.
     """
-    print("\nWelcome to the Grocery List app! Let's make shopping easier.")
+    print('')
+    print(utils.get_line_delimiter())
+    print("Welcome to the Grocery List app! Let's make shopping easier.")
+    print(utils.get_line_delimiter())
 
     while True:
-        command = input(
-            "\nEnter a command (add, remove, edit, list, export, search, or quit): "
-        )
+        command = input("\nEnter a command (add, remove, edit, list, export, search, or quit): ")
+
 
         if command == "add":
 
@@ -31,14 +36,14 @@ def launch():
             handle_edit_command()
 
         elif command == "list":
-
-            # Prints all the items in the grocery list
-            handle_list_command()
+            grocery_list = app_core.get_grocery_list()
+            app_core.list_items(grocery_list)
+            print(utils.get_line_delimiter())
 
         elif command == "export":
-
-            # Prints items marked for 'buy' in the grocery list
-            handle_export_command()
+            grocery_list = app_core.get_grocery_list()      
+            app_core.export_items(grocery_list)
+            print(utils.get_line_delimiter())
 
         elif command == "search":
 
@@ -53,7 +58,9 @@ def  handle_add_command():
     Handles the logic triggered by the add command in command line mode.
     Adds an item to the grocery list.
     """
-    print("\nEnter the following information:")
+    print('')
+    print(utils.get_line_delimiter())
+    print("Enter the following information:\n")
     
     # Get the inputs from the user
     name, store, cost, amount, priority, buy = get_inputs()
@@ -131,20 +138,12 @@ def handle_edit_command():
         name, store, cost, amount, priority, buy = get_inputs()
         app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
 
-def handle_list_command():
-    print("\nThese are the current items in the grocery list.\n")
-    app_core.list_items()
-
-
-def handle_export_command():
-    print("\nThese are the current items marked to buy.")
-    app_core.export_items()
-
 def handle_search_command():
     """Prompt user for a search keyword and display matching items."""
 
     search_keyword = input("\nWhat is the name of the item you would like to search? ")
     matches = app_core.search_item_name(search_keyword)  # Call search function
+    print('')
 
     if matches:
         for match_num, match in enumerate(matches, start=1):
@@ -162,6 +161,8 @@ def handle_search_command():
     else:
         print("No items match the provided search keyword.")
 
+    print(utils.get_line_delimiter())
+
 def get_inputs():
     """
     Collects user input for a grocery item, allowing optional skipping of fields.
@@ -175,108 +176,202 @@ def get_inputs():
             - priority (int or None): Priority level (1-5) (optional).
             - buy (bool or None): Whether the item is marked to buy (optional).
     """
+    name = get_name_input()
+    print(utils.get_line_delimiter())
+    print('')
 
-    while True:
-        name = input("\nitem name: ")
-
-        if name:
-            break
-
-        print("Invalid input. Please enter a valid item.")
-
-    while True:
-        store = input("store name: ")
-
-        if store == "skip":
-            store = None
-            break
-
-        elif store:
-            break
-
-        print('Invalid input. Please enter a valid item or enter "skip" to ' "skip.")
-
-    while True:
-        try:
-            cost = input("item price: ")
-
-            if cost == "skip":
-                cost = None
-                break
-
-            elif cost:
-                cost = float(cost)
-                break
-        except ValueError:
-            print(
-                'Invalid input. Please enter a valid price or enter "skip" ' "to skip."
-            )
-
-    while True:
-        try:
-            amount = input("item quantity: ")
-
-            if amount == "skip":
-                amount = None
-                break
-
-            elif int(amount) > 0:
-                amount = int(amount)
-                break
-
-            else:
-                print("Quantity must be a positive number.")
-
-        except ValueError:
-            print(
-                'Invalid input. Please enter a valid quantity or enter "skip" '
-                "to skip."
-            )
-
-    while True:
-        try:
-            priority = input("item priority (1-5): ")
-            if priority == "skip":
-                priority = None
-                break
-
-            elif 1 <= int(priority) <= 5:
-                priority = int(priority)
-                break
-
-            else:
-                print("Priority must be between 1 and 5.")
-
-        except ValueError:
-            print(
-                'Invalid input. Please enter a valid priority or enter "skip" '
-                "to skip."
-            )
-
-    while True:
-        try:
-            buy = input("buy (yes/no): ")
-
-            if buy.lower() == "yes":
-                buy = True
-                break
-
-            elif buy.lower() == "no":
-                buy = False
-                break
-
-            elif buy == "skip":
-                buy = None
-                break
-
-            else:
-                print("Invalid input. Please enter yes or no.")
-
-        except ValueError:
-            print('Invalid input. Please enter yes or no or enter "skip" to ' "skip.")
+    store = get_store_input()
+    print(utils.get_line_delimiter())
+    print('')
+    
+    cost = get_cost_input()
+    print(utils.get_line_delimiter())
+    print('')
+    
+    amount = get_amount_input()
+    print(utils.get_line_delimiter())
+    print('')
+    
+    priority = get_priority_input()
+    print(utils.get_line_delimiter())
+    print('')
+    
+    buy = get_buy_input()
+    print(utils.get_line_delimiter())
+    print('')
+    
 
     return name, store, cost, amount, priority, buy
 
+def get_name_input():
+    """
+    Get the user input for the name attribute
+
+    Returns:
+        name (str): The name of the item
+    """
+    print("Enter a name for the item. (ex. Ice Cream)")
+
+    # Get the name input
+    name = input("Item name: ").strip()
+
+    # No name provided, set to default
+    if not name:
+        name = constants.NAME_DEFAULT
+
+    return name
+
+def get_store_input():
+    print("Enter the name of the store for the item. (ex. Walmart)")
+
+    # Get the store input
+    store = input("Store name (or 'skip' to leave blank): ").strip()
+
+    # No store provided, set to default
+    if not store:
+        store = constants.STORE_DEFAULT
+
+    return store
+
+def get_cost_input():
+    print("Enter the cost of the item. (ex. 5.25)")
+
+    while True:
+        # Get the cost input
+        cost = input("Item price: ").strip()
+
+        # No cost input provided, set to default
+        if not cost:
+            cost = constants.COST_DEFAULT
+            break
+
+        try:
+            # Convert the cost to a float
+            cost = float(cost)
+            break
+
+        # Unable to convert the cost to a float
+        except ValueError:
+            print("Invalid input. Please enter a valid price.")
+
+    return cost
+
+def get_amount_input():
+    print("Enter the amount you need to get. (ex. 5)")
+    while True:
+
+        # Get the amount input
+        amount = input(
+            "Item quantity: "
+            ).strip()
+        
+        # Amount not provided, set to default
+        if not amount:
+            amount = constants.AMOUNT_DEFAULT
+            break
+
+        try:
+            # Convert the amount to an int
+            amount = int(amount)
+
+            # Amount must be at least 1
+            if amount > 0:
+                break
+
+            print("Quantity must be a positive number.")
+
+        # Unable to convert amount to an int
+        except ValueError:
+            print("Invalid input. Please enter a valid quantity.")
+
+    return amount
+
+def get_priority_input():
+    p_min = constants.PRIORITY_MIN
+    p_max = constants.PRIORITY_MAX
+
+    print(f'Enter the priority for the item between {p_min}-{p_max}. (ex. 2)')
+
+    while True:
+        priority = input('Item priority: ').strip()
+
+        if not priority:
+            constants.PRIORITY_DEFAULT
+            break
+        try:
+            priority = int(priority)
+
+            if p_min <= priority <= p_max:
+                break
+
+        except ValueError:
+            print(f'Invalid input. Please enter a number between {p_min}-{p_max}.')
+
+    return priority
+
+def get_priority_input():
+    p_min = constants.PRIORITY_MIN
+    p_max = constants.PRIORITY_MAX
+    
+    print(
+        f"Enter the priority for the item between "
+        f"{p_min}-{p_max}. (ex. 2)"
+        )
+
+    while True:
+        # Get the priority input
+        priority = input("Priority: ").strip()
+        
+        # No input provided, set to default
+        if not priority:
+            constants.PRIORITY_DEFAULT
+            break
+
+        try:
+            # Convert the priority to an int
+            priority = int(priority)
+
+            # Check priority is within min to max
+            if p_min <= priority <= p_max:
+                break
+
+        # Failed to convert priority to an int
+        except ValueError:
+            print(
+                f"Invalid input. Please enter a number between "
+                f"{p_min} and {p_max}."
+                )
+
+    return priority
+
+def get_buy_input():
+    print("Enter if this item should be purchased now. (ex. yes)")
+
+    while True:
+        # Get the buy input
+        buy = input("Buy: ").strip().lower()
+
+        # No buy input provided
+        if not buy:
+            buy = constants.BUY_DEFAULT
+            break
+
+        # Buy input is true
+        if buy in constants.BUY_TRUE:
+            buy = True
+            break
+
+        # Buy input is false
+        elif buy in constants.BUY_FALSE:
+            buy = False
+            break
+
+        # Buy input was not valid
+        else:
+            print(
+                "Invalid input. Please enter true|yes OR false|no")
+
+    return buy
 
 if __name__ == "__main__":
     launch()

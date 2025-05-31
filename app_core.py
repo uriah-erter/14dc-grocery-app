@@ -1,61 +1,31 @@
+
+import logging
+import os
 import re
 import uuid
 
+import constants
+import log_config
+import utils
 
-# Grocery list containing predefined items with attributes such as name, store, cost, amount, priority, and buy status.
-grocery_list = [
-    {'name': 'milk',
-     'store': 'H.E.B.',
-     'cost': 3.19,
-     'amount': 1,
-     'priority': 1,
-     'buy': True,
-     'id': 324148079480209640266124969462437015018
-     },
-    {'name': 'eggs',
-     'store': 'H.E.B.',
-     'cost': 6.09,
-     'amount': 1,
-     'priority': 1,
-     'buy': True,
-     'id': 197309914455992414179216031361480414011
-     },
-    {'name': 'cheese',
-     'store': 'H.E.B.',
-     'cost': 4.46,
-     'amount': 1,
-     'priority': 1,
-     'buy': True,
-     'id': 9479391863861648278192224790194635018
-     },
-    {'name': 'steak',
-     'store': 'H.E.B.',
-     'cost': 12.79, 
-     'amount': 1,
-     'priority': 1, 
-     'buy': True,
-     'id': 48600721663948687578776355804601712073
-    },
-    {'name': 'chicken',
-     'store': 'H.E.B.',
-     'cost': 13.59,
-     'amount': 1,
-     'priority': 1,
-     'buy': True,
-     'id': 314903496015975209550637873193073339410 
-     },
-     {'name': 'milk',
-     'store': 'H.E.B.',
-     'cost': 3.19,
-     'amount': 1,
-     'priority': 1,
-     'buy': True,
-     'id': 324148079480209640266124969462437015019
-     }
-]
+def get_grocery_list():
+    os.makedirs(constants.EXPORT_PATH, exist_ok=True)
+    file_path = os.path.join(constants.EXPORT_PATH, f'{constants.GROCERY_LIST}.json')
+
+    if os.path.exists(file_path):
+        grocery_list = utils.load_data(file_path)
+
+    else:
+        print('No JSON path found, creating JSON path.')
+        grocery_list = []
+        utils.save_data(file_path, grocery_list)
+
+    return grocery_list
 
 def get_index_from_id(id):
     index = 0
+    grocery_list = get_grocery_list()
+
     for item in grocery_list:
         if item['id'] == id:
             return index
@@ -95,7 +65,8 @@ def get_index_from_name(name):
         int or None: Index of the item if found, otherwise None.
     """
     index = 0
-    
+    grocery_list = get_grocery_list()
+
     for item in grocery_list:
         if item['name'] == name:
             return index
@@ -128,7 +99,12 @@ def add_item(name, store, cost, amount, priority, buy):
             'id': unique_id
             }
     
+    grocery_list = get_grocery_list()
     grocery_list.append(item)
+
+    file_path = os.path.join(constants.EXPORT_PATH, f'{constants.GROCERY_LIST}.json')
+    utils.save_data(file_path, grocery_list)
+
 
 def remove_item(name: str, id: int):
     """
@@ -138,7 +114,11 @@ def remove_item(name: str, id: int):
         id (int): Name of the item to remove.
     """
     index = get_index_from_id(id)
+    grocery_list = get_grocery_list()
     grocery_list.pop(index)
+
+    file_path = os.path.join(constants.EXPORT_PATH, f'{constants.GROCERY_LIST}.json')
+    utils.save_data(file_path, grocery_list)
 
 def edit_item(
         name: str,
@@ -162,7 +142,7 @@ def edit_item(
         id (str | None): Updated id.
     """
     index = get_index_from_id(id)
-    old_item = grocery_list[index]
+    old_item = get_grocery_list()
 
     if not name:
         name = old_item['name']
@@ -195,12 +175,17 @@ def edit_item(
         "id": id
         }
 
+    grocery_list = get_grocery_list()
     grocery_list[index] = item
 
-def list_items():
+    file_path = os.path.join(constants.EXPORT_PATH, f'{constants.GROCERY_LIST}.json')
+    utils.save_data(file_path, grocery_list)
+
+def list_items(grocery_list):
     """
     Prints all items in the grocery list.
     """
+
     for match_num, item in enumerate(grocery_list, start=1):
         match_string = (
             f"{match_num}. "
@@ -213,33 +198,53 @@ def list_items():
         )
         print(match_string)    
 
-def export_items():
+def export_items(grocery_list):
     """
-    Exports items that need to be bought and calculates the total cost.
+    Exports items that need to be bought, saves them to a file, and prints details to the screen.
     """
     buy_list = [item for item in grocery_list if item['buy']]
 
-    if buy_list:
+    if not buy_list:
+        print("No items to export.")
+        return
+
+    file_path = os.path.join(constants.EXPORT_PATH, "export_grocery_list.txt")
+
+    # Check if file already exists
+    if utils.check_file_exists(file_path):
+        print(f"\nWarning: '{constants.EXPORT_LIST}' already exists and will be overwritten.\n")
+
+    # Ask for user confirmation
+    user_input = input("Do you want to proceed? (yes/no): ").strip().lower()
+    print('')
+    
+    if user_input not in ("yes", "y"):
+        print("Export canceled.\n")
+        return  # Exit the function if the user does not confirm
+    
+    with open(file_path, "w") as file:
+        file.write('\n** Grocery List Export ** \n\n')
         for match_num, item in enumerate(buy_list, start=1):
             match_string = (
-                f"{match_num}. "
-                f"Name: {item["name"]}, "
-                f"Store: {item["store"]}, "
-                f"Cost: {item["cost"]}, "
-                f"Amount: {item["amount"]}, "
-                f"Priority: {item["priority"]}, "
-                f"Buy: {item["buy"]}"
-            )
-            print(match_string)
-        
+                f"Item {match_num:<3} | Name: {item['name']:<10} | Store: {item['store']:<10} | "
+                f"Cost: {item['cost']:<6} | Amount: {item['amount']:<3} | Priority: {item['priority']:<3}"
+                )
+            print(match_string)  # Print each item to the screen
+            file.write(match_string + "\n")  # Write to the file
+
         total_cost = calculate_total_cost(buy_list, round_cost=True)
-        print(f'\nTotal cost: ${total_cost:.2f}')
+        print(f"\nThe total cost is ${total_cost:.2f}\n")  # Print total cost to screen
+        file.write(f"\nThe total cost is ${total_cost:.2f}\n")  # Write total cost to file
+
+    print(f"Grocery list exported to {file_path}")
 
 def search_item_name(search_item):
     """Search for items in the grocery list based on a given keyword."""
     matching_items = []  # Initialize an empty list to store matches
     pattern = rf"^{search_item}"  # Create the search pattern
     
+    grocery_list = get_grocery_list()
+
     for item in grocery_list:
         if re.match(pattern, item['name'], re.IGNORECASE):  # Use re.match with case insensitivity
             matching_items.append(item)  # Add matching items to the list
