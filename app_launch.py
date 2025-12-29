@@ -1,5 +1,4 @@
 import app_core
-import log_config
 import constants
 import utils
 
@@ -17,8 +16,8 @@ def launch():
     print(utils.get_line_delimiter())
 
     while True:
-        command = input("\nEnter a command (add, remove, edit, list, export, search, or quit): ")
-
+        command = input(
+            "\nEnter a command (add, remove, edit, list, export, search, or quit): ")
 
         if command == "add":
 
@@ -31,7 +30,7 @@ def launch():
             handle_remove_command()
 
         elif command == "edit":
-            
+
             # Edit an item in the grocery list
             handle_edit_command()
 
@@ -41,7 +40,7 @@ def launch():
             print(utils.get_line_delimiter())
 
         elif command == "export":
-            grocery_list = app_core.get_grocery_list()      
+            grocery_list = app_core.get_grocery_list()
             app_core.export_items(grocery_list)
             print(utils.get_line_delimiter())
 
@@ -53,7 +52,8 @@ def launch():
         elif command == "quit":
             break
 
-def  handle_add_command():
+
+def handle_add_command():
     """
     Handles the logic triggered by the add command in command line mode.
     Adds an item to the grocery list.
@@ -61,7 +61,7 @@ def  handle_add_command():
     print('')
     print(utils.get_line_delimiter())
     print("Enter the following information:\n")
-    
+
     # Get the inputs from the user
     name, store, cost, amount, priority, buy = get_inputs()
 
@@ -72,9 +72,10 @@ def  handle_add_command():
         cost=cost,
         amount=amount,
         priority=priority,
-        buy=buy    
+        buy=buy
     )
     print(f'\nItem was added to the grocery list.')
+
 
 def handle_remove_command():
     name = input("\nEnter the item name to remove: ")
@@ -96,8 +97,9 @@ def handle_remove_command():
                 f"| Buy: {match["buy"]} |"
             )
             print(match_string)
-    
-        item_num = input('\nPlease select the number you would lke to remove: ')
+
+        item_num = input(
+            '\nPlease select the number you would lke to remove: ')
         match_item = matches[int(item_num) - 1]
         app_core.remove_item(name, id=match_item['id'])
         print(f'\nItem {match_num} has been removed.')
@@ -107,13 +109,15 @@ def handle_remove_command():
         app_core.remove_item(name, id=match_item['id'])
         print(f'That item has been removed.')
 
+
 def handle_edit_command():
     target_item = input('\nWhat item would you like to edit: ')
     print("\nRetrieving your matching items...\n")
     matches = app_core.search_item_name(target_item)
 
     if not matches:
-        print(f'\nI\'m sorry, I could not find a match for \'{target_item}.\'\n')
+        print(
+            f'\nI\'m sorry, I could not find a match for \'{target_item}.\'\n')
 
     elif len(matches) > 1:
         for match_num, match in enumerate(matches, start=1):
@@ -131,17 +135,21 @@ def handle_edit_command():
         item_num = input('\nPlease select the number you would like to edit: ')
         match_item = matches[int(item_num) - 1]
         name, store, cost, amount, priority, buy = get_inputs()
-        app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
-    
+        app_core.edit_item(name, store, cost, amount,
+                           priority, buy, id=match_item['id'])
+
     else:
         match_item = matches[0]
         name, store, cost, amount, priority, buy = get_inputs()
-        app_core.edit_item(name, store, cost, amount, priority, buy, id=match_item['id'])
+        app_core.edit_item(name, store, cost, amount,
+                           priority, buy, id=match_item['id'])
+
 
 def handle_search_command():
     """Prompt user for a search keyword and display matching items."""
 
-    search_keyword = input("\nWhat is the name of the item you would like to search? ")
+    search_keyword = input(
+        "\nWhat is the name of the item you would like to search? ")
     matches = app_core.search_item_name(search_keyword)  # Call search function
     print('')
 
@@ -163,6 +171,7 @@ def handle_search_command():
 
     print(utils.get_line_delimiter())
 
+
 def get_inputs():
     """
     Collects user input for a grocery item, allowing optional skipping of fields.
@@ -183,25 +192,25 @@ def get_inputs():
     store = get_store_input()
     print(utils.get_line_delimiter())
     print('')
-    
+
     cost = get_cost_input()
     print(utils.get_line_delimiter())
     print('')
-    
+
     amount = get_amount_input()
     print(utils.get_line_delimiter())
     print('')
-    
+
     priority = get_priority_input()
     print(utils.get_line_delimiter())
     print('')
-    
+
     buy = get_buy_input()
     print(utils.get_line_delimiter())
     print('')
-    
 
     return name, store, cost, amount, priority, buy
+
 
 def get_name_input():
     """
@@ -221,6 +230,7 @@ def get_name_input():
 
     return name
 
+
 def get_store_input():
     print("Enter the name of the store for the item. (ex. Walmart)")
 
@@ -232,6 +242,7 @@ def get_store_input():
         store = constants.STORE_DEFAULT
 
     return store
+
 
 def get_cost_input():
     print("Enter the cost of the item. (ex. 5.25)")
@@ -256,6 +267,7 @@ def get_cost_input():
 
     return cost
 
+
 def get_amount_input():
     print("Enter the amount you need to get. (ex. 5)")
     while True:
@@ -263,8 +275,8 @@ def get_amount_input():
         # Get the amount input
         amount = input(
             "Item quantity: "
-            ).strip()
-        
+        ).strip()
+
         # Amount not provided, set to default
         if not amount:
             amount = constants.AMOUNT_DEFAULT
@@ -286,6 +298,7 @@ def get_amount_input():
 
     return amount
 
+
 def get_priority_input():
     p_min = constants.PRIORITY_MIN
     p_max = constants.PRIORITY_MAX
@@ -305,23 +318,25 @@ def get_priority_input():
                 break
 
         except ValueError:
-            print(f'Invalid input. Please enter a number between {p_min}-{p_max}.')
+            print(
+                f'Invalid input. Please enter a number between {p_min}-{p_max}.')
 
     return priority
+
 
 def get_priority_input():
     p_min = constants.PRIORITY_MIN
     p_max = constants.PRIORITY_MAX
-    
+
     print(
         f"Enter the priority for the item between "
         f"{p_min}-{p_max}. (ex. 2)"
-        )
+    )
 
     while True:
         # Get the priority input
         priority = input("Priority: ").strip()
-        
+
         # No input provided, set to default
         if not priority:
             constants.PRIORITY_DEFAULT
@@ -340,9 +355,10 @@ def get_priority_input():
             print(
                 f"Invalid input. Please enter a number between "
                 f"{p_min} and {p_max}."
-                )
+            )
 
     return priority
+
 
 def get_buy_input():
     print("Enter if this item should be purchased now. (ex. yes)")
@@ -372,6 +388,7 @@ def get_buy_input():
                 "Invalid input. Please enter true|yes OR false|no")
 
     return buy
+
 
 if __name__ == "__main__":
     launch()

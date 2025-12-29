@@ -20,18 +20,20 @@ def load_data(file_path: str) -> list:
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             return json.load(file)
-        
+
     except (IOError, json.JSONDecodeError) as e:
         print(f"Error loading data: {e}")
         return []
-    
+
+
 def check_file_exists(file_path):
     """
     Checks if a file exists at the given path.
     """
     return os.path.isfile(file_path)
 
+
 def get_line_delimiter():
     delimiter = '-' * 69
-    
+
     return delimiter
