@@ -20,15 +20,7 @@ from grocery_item import GroceryItem
 
 
 class GroceryList:
-    """
-    Primary application model/controller for grocery list operations.
-
-    This class manages:
-    - Loading/saving the grocery list JSON file
-    - Adding/removing/editing GroceryItem objects
-    - Searching items by name prefix
-    - Exporting a "buy == True" list to a text file
-    """
+    """Primary application class that manages grocery list operations."""
 
     def __init__(self) -> None:
         """Initialize paths, load existing list from disk (or create a new one)."""
@@ -61,33 +53,22 @@ class GroceryList:
         return self.grocery_list
 
     def get_index_from_id(self, item_id: int) -> int | None:
-        """
-        Return the index of the item with the given unique ID.
-
-        Returns:
-            int | None: Index if found, otherwise None.
-        """
+        """Return the index of the item with the given unique ID, or None if not found."""
         for index, item in enumerate(self.grocery_list):
             if item.id == item_id:
                 return index
         return None
 
     def get_index_from_name(self, name: str) -> int | None:
-        """
-        Return the index of the first item matching the given name exactly.
-
-        Note:
-            This function returns the first match only. If you want multiple matches,
-            use search_item_name() instead.
-        """
+        """Return the index of the first item matching the given name exactly, or None."""
         for index, item in enumerate(self.grocery_list):
             if item.name == name:
                 return index
         return None
 
+    @staticmethod
     def calculate_total_cost(
-        self,
-        grocery_list: list[GroceryItem],
+        grocery_list: list[object],
         round_cost: bool = False,
         tax: float = 0.0825,
     ) -> float:
@@ -113,12 +94,7 @@ class GroceryList:
         return total_cost
 
     def add_item(self, name, store, cost, amount, priority, buy) -> None:
-        """
-        Create and append a new GroceryItem to the list and persist it.
-
-        Note:
-            The item ID is generated from a UUID and stored as an int.
-        """
+        """Create and append a new GroceryItem to the list and persist it."""
         unique_id = int(uuid.uuid4())
 
         grocery_item = GroceryItem()
@@ -134,13 +110,7 @@ class GroceryList:
         self.save_data()
 
     def remove_item(self, name: str, id: int) -> None:
-        """
-        Remove an item by its unique ID and persist changes.
-
-        Args:
-            name: Provided for UX/context (not used for deletion logic).
-            id: Unique item identifier.
-        """
+        """Remove an item by its unique ID and persist changes."""
         index = self.get_index_from_id(id)
         if index is None:
             print(f"Could not remove '{name}': ID not found.")
@@ -159,11 +129,7 @@ class GroceryList:
         buy: bool | None = None,
         id: int | None = None,
     ) -> None:
-        """
-        Edit an existing item by ID.
-
-        Any argument passed as None will be treated as "do not change this field".
-        """
+        """Edit an existing item by ID. None values mean 'keep current'."""
         if id is None:
             print("Cannot edit item: missing id.")
             return
@@ -175,14 +141,12 @@ class GroceryList:
 
         current_item = self.grocery_list[index]
 
-        # Strings: update only if the caller provided a value (None means "keep").
         if name is not None:
             current_item.name = name
 
         if store is not None:
             current_item.store = store
 
-        # Numerics: update only if the caller provided a value.
         if cost is not None:
             current_item.cost = cost
 
@@ -192,7 +156,7 @@ class GroceryList:
         if priority is not None:
             current_item.priority = priority
 
-        # Boolean: must explicitly check for None so False can be applied.
+        # Boolean must check for None so False can be applied.
         if buy is not None:
             current_item.buy = buy
 
@@ -213,12 +177,7 @@ class GroceryList:
             print(match_string)
 
     def export_items(self, grocery_list: list[GroceryItem]) -> None:
-        """
-        Export items marked for purchase (buy is True) to a text file.
-
-        The export file is separate from the JSON storage file to avoid corruption.
-        """
-        # Only export items with a real boolean True value.
+        """Export items marked for purchase (buy is True) to a text file."""
         buy_list = [item for item in grocery_list if item.buy is True]
 
         if not buy_list:
@@ -250,11 +209,7 @@ class GroceryList:
         print(f"Grocery list exported to {exported_list_file}")
 
     def search_item_name(self, search_item: str) -> list[GroceryItem]:
-        """
-        Return items whose names start with the provided search string (case-insensitive).
-
-        Uses re.escape() to ensure special characters in user input are treated literally.
-        """
+        """Return items whose names start with the provided search string (case-insensitive)."""
         matching_items: list[GroceryItem] = []
         pattern = rf"^{re.escape(search_item)}"
 
@@ -269,17 +224,17 @@ class GroceryList:
         Persist the current grocery list to JSON.
 
         Note:
-            Using vars(item) writes the object's internal attributes (e.g. _name).
-            A cleaner long-term approach is to add GroceryItem.to_dict() and use that.
+            This writes internal fields (e.g. _name). A cleaner approach is to
+            add GroceryItem.to_dict() and use that.
         """
-        export_list: list[dict] = [vars(item) for item in self.grocery_list]
+        export_list = [vars(item) for item in self.grocery_list]
         utils.save_data(self.grocery_list_path, export_list)
 
     def load_data(self) -> list[GroceryItem]:
         """
         Load grocery list data from JSON and convert entries into GroceryItem objects.
 
-        Also normalizes:
+        Normalizes:
         - legacy keys that start with "_" (e.g. "_buy" -> "buy")
         - string booleans for buy ("True"/"False") into real bools
         """
@@ -290,11 +245,9 @@ class GroceryList:
             grocery_item = GroceryItem()
 
             for key, value in item_dict.items():
-                # Normalize old JSON keys like "_name" to property names "name".
                 if isinstance(key, str) and key.startswith("_"):
                     key = key[1:]
 
-                # Normalize buy if it was stored as a string in older exports.
                 if key == "buy" and isinstance(value, str):
                     v = value.strip().lower()
                     if v in ("true", "yes", "y", "1"):
@@ -302,7 +255,6 @@ class GroceryList:
                     elif v in ("false", "no", "n", "0"):
                         value = False
 
-                # Only set attributes that exist as properties on GroceryItem.
                 if hasattr(grocery_item, key):
                     setattr(grocery_item, key, value)
 

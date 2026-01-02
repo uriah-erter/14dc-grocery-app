@@ -44,18 +44,17 @@ class Launch:
             elif command == "edit":
                 self.handle_edit_command()
             elif command == "list":
-                # List all items currently in memory.
                 self.grocery_app.list_items(self.grocery_app.grocery_list)
             elif command == "export":
-                # Export only items marked for purchase (buy == True).
                 self.grocery_app.export_items(self.grocery_app.grocery_list)
             elif command == "search":
                 self.handle_search_command()
             elif command == "quit":
                 break
             else:
-                # Helpful feedback when the user types an unsupported command.
-                print("Unknown command. Please enter add, remove, edit, list, export, search, or quit.")
+                print(
+                    "Unknown command. Please enter add, remove, edit, list, export, search, or quit."
+                )
 
     def handle_add_command(self) -> None:
         """Collect inputs for a new item and add it to the grocery list."""
@@ -65,7 +64,6 @@ class Launch:
 
         name, store, cost, amount, priority, buy = self.get_inputs()
 
-        # Delegate creation and persistence to the core application.
         self.grocery_app.add_item(
             name=name,
             store=store,
@@ -78,9 +76,9 @@ class Launch:
 
     def handle_remove_command(self) -> None:
         """
-        Remove an item by name.
+        Remove an item by name prefix.
 
-        If multiple items match the name prefix, prompt the user to choose which one.
+        If multiple items match, prompt the user to choose which one.
         """
         name = input("\nEnter the item name to remove: ").strip()
         print("")
@@ -92,7 +90,6 @@ class Launch:
             return
 
         if len(matches) > 1:
-            # Display matching items so the user can choose the correct one.
             for match_num, match in enumerate(matches, start=1):
                 match_string = (
                     f"{match_num}. "
@@ -105,15 +102,15 @@ class Launch:
                 )
                 print(match_string)
 
-            item_num = input("\nPlease select the number you would like to remove: ").strip()
+            item_num = input(
+                "\nPlease select the number you would like to remove: "
+            ).strip()
             match_item = matches[int(item_num) - 1]
 
-            # Remove by unique ID to avoid ambiguity with duplicate names.
             self.grocery_app.remove_item(name, id=match_item.id)
             print("\nSelected item has been removed.")
             return
 
-        # Exactly one match.
         match_item = matches[0]
         self.grocery_app.remove_item(name, id=match_item.id)
         print("That item has been removed.")
@@ -147,15 +144,15 @@ class Launch:
                     f"| buy: {match.buy}"
                 )
 
-            item_num = input("\nPlease select the number you would like to edit: ").strip()
+            item_num = input(
+                "\nPlease select the number you would like to edit: "
+            ).strip()
             match_item = matches[int(item_num) - 1]
         else:
             match_item = matches[0]
 
-        # Edit inputs return None for "keep existing value".
         name, store, cost, amount, priority, buy = self.get_inputs_edit()
 
-        # Delegate edit/persist logic to the core application.
         self.grocery_app.edit_item(
             name,
             store,
@@ -168,7 +165,9 @@ class Launch:
 
     def handle_search_command(self) -> None:
         """Search for items by name prefix and print matching results."""
-        search_keyword = input("\nWhat is the name of the item you would like to search? ").strip()
+        search_keyword = input(
+            "\nWhat is the name of the item you would like to search? "
+        ).strip()
         matches = self.grocery_app.search_item_name(search_keyword)
         print("")
 
@@ -225,17 +224,15 @@ class Launch:
 
         return name, store, cost, amount, priority, buy
 
-    def get_name_input(self) -> str:
+    @staticmethod
+    def get_name_input() -> str:
         """Get item name for ADD. Blank input uses NAME_DEFAULT."""
         print("Enter a name for the item. (ex. Ice Cream)")
         name = input("Item name: ").strip()
+        return name if name else constants.NAME_DEFAULT
 
-        if not name:
-            name = constants.NAME_DEFAULT
-
-        return name
-
-    def get_store_input(self) -> str:
+    @staticmethod
+    def get_store_input() -> str:
         """
         Get store name for ADD.
 
@@ -248,15 +245,12 @@ class Launch:
         if store.lower() == "skip":
             return ""
 
-        if not store:
-            store = constants.STORE_DEFAULT
+        return store if store else constants.STORE_DEFAULT
 
-        return store
-
-    def get_cost_input(self) -> float:
+    @staticmethod
+    def get_cost_input() -> float:
         """Get item cost for ADD. Blank input uses COST_DEFAULT."""
         print("Enter the cost of the item. (ex. 5.25)")
-
         while True:
             cost = input("Item price: ").strip()
 
@@ -268,10 +262,10 @@ class Launch:
             except ValueError:
                 print("Invalid input. Please enter a valid price.")
 
-    def get_amount_input(self) -> int:
+    @staticmethod
+    def get_amount_input() -> int:
         """Get item amount for ADD. Blank input uses AMOUNT_DEFAULT."""
         print("Enter the amount you need to get. (ex. 5)")
-
         while True:
             amount = input("Item quantity: ").strip()
 
@@ -286,13 +280,13 @@ class Launch:
             except ValueError:
                 print("Invalid input. Please enter a valid quantity.")
 
-    def get_priority_input(self) -> int:
+    @staticmethod
+    def get_priority_input() -> int:
         """Get priority for ADD. Blank input uses PRIORITY_DEFAULT."""
         p_min = constants.PRIORITY_MIN
         p_max = constants.PRIORITY_MAX
 
         print(f"Enter the priority for the item between {p_min}-{p_max}. (ex. 2)")
-
         while True:
             priority = input("Item priority: ").strip()
 
@@ -307,19 +301,17 @@ class Launch:
             except ValueError:
                 print(f"Invalid input. Please enter a number between {p_min}-{p_max}.")
 
-    def get_buy_input(self) -> bool:
+    @staticmethod
+    def get_buy_input() -> bool:
         """Get buy flag for ADD. Blank input uses BUY_DEFAULT."""
         print("Enter if this item should be purchased now. (ex. yes)")
-
         while True:
             buy = input("Buy: ").strip().lower()
 
             if buy == "":
                 return constants.BUY_DEFAULT
-
             if buy in constants.BUY_TRUE:
                 return True
-
             if buy in constants.BUY_FALSE:
                 return False
 
@@ -361,19 +353,22 @@ class Launch:
 
         return name, store, cost, amount, priority, buy
 
-    def get_name_input_edit(self):
+    @staticmethod
+    def get_name_input_edit():
         """Get item name for EDIT. Blank returns None (keep current)."""
         print("Enter a name for the item (press Enter to keep current).")
         name = input("Item name: ").strip()
         return None if name == "" else name
 
-    def get_store_input_edit(self):
+    @staticmethod
+    def get_store_input_edit():
         """Get store name for EDIT. Blank returns None (keep current)."""
         print("Enter the store name (press Enter to keep current).")
         store = input("Store name: ").strip()
         return None if store == "" else store
 
-    def get_cost_input_edit(self):
+    @staticmethod
+    def get_cost_input_edit():
         """Get item cost for EDIT. Blank returns None (keep current)."""
         print("Enter the cost (press Enter to keep current).")
         while True:
@@ -385,7 +380,8 @@ class Launch:
             except ValueError:
                 print("Invalid input. Please enter a valid price.")
 
-    def get_amount_input_edit(self):
+    @staticmethod
+    def get_amount_input_edit():
         """Get item amount for EDIT. Blank returns None (keep current)."""
         print("Enter the quantity (press Enter to keep current).")
         while True:
@@ -400,7 +396,8 @@ class Launch:
             except ValueError:
                 print("Invalid input. Please enter a valid quantity.")
 
-    def get_priority_input_edit(self):
+    @staticmethod
+    def get_priority_input_edit():
         """Get item priority for EDIT. Blank returns None (keep current)."""
         p_min = constants.PRIORITY_MIN
         p_max = constants.PRIORITY_MAX
@@ -418,7 +415,8 @@ class Launch:
             except ValueError:
                 print(f"Invalid input. Please enter a number between {p_min}-{p_max}.")
 
-    def get_buy_input_edit(self):
+    @staticmethod
+    def get_buy_input_edit():
         """Get buy flag for EDIT. Blank returns None (keep current)."""
         print("Enter buy yes/no (press Enter to keep current).")
         while True:
