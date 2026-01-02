@@ -1,20 +1,51 @@
+"""
+app_core.py
+
+Core application logic for the Grocery List CLI app.
+
+Responsibilities:
+- Maintain an in-memory list of GroceryItem objects
+- Provide CRUD operations (add/remove/edit/list/search)
+- Persist the list to disk as JSON
+- Export a filtered "buy list" to a text file
+"""
+
 import os
 import re
 import uuid
 
 import constants
 import utils
-
 from grocery_item import GroceryItem
 
-class GroceryList:
 
-    def __init__(self):
-        self.grocery_list_path = os.path.join(constants.EXPORT_PATH, f'{constants.GROCERY_LIST}.json')
-        self.grocery_list = []
+class GroceryList:
+    """
+    Primary application model/controller for grocery list operations.
+
+    This class manages:
+    - Loading/saving the grocery list JSON file
+    - Adding/removing/editing GroceryItem objects
+    - Searching items by name prefix
+    - Exporting a "buy == True" list to a text file
+    """
+
+    def __init__(self) -> None:
+        """Initialize paths, load existing list from disk (or create a new one)."""
+        self.grocery_list_path = os.path.join(
+            constants.EXPORT_PATH,
+            f"{constants.GROCERY_LIST}.json",
+        )
+        self.grocery_list: list[GroceryItem] = []
         self.set_grocery_list()
 
-    def set_grocery_list(self):
+    def set_grocery_list(self) -> list[GroceryItem]:
+        """
+        Ensure export directory exists and load the grocery list from disk.
+
+        If the grocery list file does not exist yet, create an empty list and save it.
+        Returns the in-memory grocery list.
+        """
         os.makedirs(constants.EXPORT_PATH, exist_ok=True)
 
         if os.path.exists(self.grocery_list_path):
@@ -29,43 +60,48 @@ class GroceryList:
         self.grocery_list = grocery_list
         return self.grocery_list
 
-    # def set_grocery_list(self):
-    #     os.makedirs(constants.EXPORT_PATH, exist_ok=True)
+    def get_index_from_id(self, item_id: int) -> int | None:
+        """
+        Return the index of the item with the given unique ID.
 
-    #     if os.path.exists(self.grocery_list_path):
-    #         grocery_list = self.load_data()
-
-    #     else:
-    #         print("")
-    #         print("** No JSON path found, creating JSON path **")
-    #         grocery_list = []
-    #         self.save_data()
-
-    #     self.set_grocery_list = grocery_list
-
-
-    def get_index_from_id(self, id):
-        index = 0
-        grocery_list = self.grocery_list
-
-        for item in grocery_list:
-            if item.id == id:
+        Returns:
+            int | None: Index if found, otherwise None.
+        """
+        for index, item in enumerate(self.grocery_list):
+            if item.id == item_id:
                 return index
-            else:
-                index += 1
+        return None
 
-    def get_index_from_name(self, name):
-        index = 0
-        grocery_list = self.grocery_list
+    def get_index_from_name(self, name: str) -> int | None:
+        """
+        Return the index of the first item matching the given name exactly.
 
-        for item in grocery_list:
+        Note:
+            This function returns the first match only. If you want multiple matches,
+            use search_item_name() instead.
+        """
+        for index, item in enumerate(self.grocery_list):
             if item.name == name:
                 return index
-            else:
-                index += 1
+        return None
 
+    def calculate_total_cost(
+        self,
+        grocery_list: list[GroceryItem],
+        round_cost: bool = False,
+        tax: float = 0.0825,
+    ) -> float:
+        """
+        Calculate the total cost of items in a list.
 
-    def calculate_total_cost(self, grocery_list: list[object], round_cost: bool = False, tax: float = 0.0825) -> float:
+        Args:
+            grocery_list: Items to total.
+            round_cost: If True, rounds the subtotal before applying tax.
+            tax: Tax rate (e.g., 0.0825 for 8.25%). Use 0 to disable.
+
+        Returns:
+            Total cost including tax (if tax > 0).
+        """
         total_cost = sum(item.amount * item.cost for item in grocery_list)
 
         if round_cost:
@@ -76,9 +112,13 @@ class GroceryList:
 
         return total_cost
 
+    def add_item(self, name, store, cost, amount, priority, buy) -> None:
+        """
+        Create and append a new GroceryItem to the list and persist it.
 
-
-    def add_item(self, name, store, cost, amount, priority, buy):
+        Note:
+            The item ID is generated from a UUID and stored as an int.
+        """
         unique_id = int(uuid.uuid4())
 
         grocery_item = GroceryItem()
@@ -89,19 +129,25 @@ class GroceryList:
         grocery_item.priority = priority
         grocery_item.buy = buy
         grocery_item.id = unique_id
-        
-        self.grocery_list.append(grocery_item)
 
+        self.grocery_list.append(grocery_item)
         self.save_data()
 
+    def remove_item(self, name: str, id: int) -> None:
+        """
+        Remove an item by its unique ID and persist changes.
 
-    def remove_item(self, name: str, id: int):
+        Args:
+            name: Provided for UX/context (not used for deletion logic).
+            id: Unique item identifier.
+        """
         index = self.get_index_from_id(id)
+        if index is None:
+            print(f"Could not remove '{name}': ID not found.")
+            return
 
         self.grocery_list.pop(index)
-
         self.save_data()
-
 
     def edit_item(
         self,
@@ -111,36 +157,49 @@ class GroceryList:
         amount: int | None = None,
         priority: int | None = None,
         buy: bool | None = None,
-        id: int | None = None
+        id: int | None = None,
     ) -> None:
+        """
+        Edit an existing item by ID.
+
+        Any argument passed as None will be treated as "do not change this field".
+        """
+        if id is None:
+            print("Cannot edit item: missing id.")
+            return
+
         index = self.get_index_from_id(id)
+        if index is None:
+            print("Cannot edit item: ID not found.")
+            return
+
         current_item = self.grocery_list[index]
 
-        if name:
+        # Strings: update only if the caller provided a value (None means "keep").
+        if name is not None:
             current_item.name = name
 
-        if store:
+        if store is not None:
             current_item.store = store
 
-        if cost:
+        # Numerics: update only if the caller provided a value.
+        if cost is not None:
             current_item.cost = cost
 
-        if amount:
+        if amount is not None:
             current_item.amount = amount
 
-        if priority:
+        if priority is not None:
             current_item.priority = priority
 
+        # Boolean: must explicitly check for None so False can be applied.
         if buy is not None:
             current_item.buy = buy
 
-        if id:
-            current_item.id = id
-        
         self.save_data()
 
-
-    def list_items(self, grocery_list):
+    def list_items(self, grocery_list: list[GroceryItem]) -> None:
+        """Print a formatted list of items to the console."""
         for match_num, item in enumerate(grocery_list, start=1):
             match_string = (
                 f"{match_num}. "
@@ -153,71 +212,100 @@ class GroceryList:
             )
             print(match_string)
 
+    def export_items(self, grocery_list: list[GroceryItem]) -> None:
+        """
+        Export items marked for purchase (buy is True) to a text file.
 
-    def export_items(self, grocery_list):
-        buy_list = [item for item in grocery_list if item.buy]
+        The export file is separate from the JSON storage file to avoid corruption.
+        """
+        # Only export items with a real boolean True value.
+        buy_list = [item for item in grocery_list if item.buy is True]
 
         if not buy_list:
             print("No items to export.")
             return
 
-        # self.list_items(buy_list)
-
         exported_list_file = os.path.join(constants.EXPORT_PATH, constants.EXPORT_LIST)
 
         with open(exported_list_file, "w") as file:
-            file.write('\n** Grocery List Export ** \n\n')
+            file.write("\n** Grocery List Export ** \n\n")
+
             for match_num, item in enumerate(buy_list, start=1):
                 match_string = (
-                    f"Item {match_num} " 
-                    f"| Name: {item.name} " 
-                    f"| Store: {item.store} " 
-                    f"| Cost: {item.cost} " 
-                    f"| Amount: {item.amount} " 
-                    f"| Priority: {item.priority} " 
+                    f"Item {match_num} "
+                    f"| Name: {item.name} "
+                    f"| Store: {item.store} "
+                    f"| Cost: {item.cost} "
+                    f"| Amount: {item.amount} "
+                    f"| Priority: {item.priority} "
                     f"| Buy: {item.buy}"
                 )
                 print(match_string)
                 file.write(match_string + "\n")
-            
+
             total_cost = self.calculate_total_cost(buy_list, round_cost=True)
             print(f"\nThe total cost is ${total_cost:.2f}\n")
             file.write(f"\nThe total cost is ${total_cost:.2f}\n")
 
         print(f"Grocery list exported to {exported_list_file}")
 
+    def search_item_name(self, search_item: str) -> list[GroceryItem]:
+        """
+        Return items whose names start with the provided search string (case-insensitive).
 
-    def search_item_name(self, search_item):
-        matching_items = []
-        pattern = rf"^{search_item}"
-        grocery_list = self.grocery_list
+        Uses re.escape() to ensure special characters in user input are treated literally.
+        """
+        matching_items: list[GroceryItem] = []
+        pattern = rf"^{re.escape(search_item)}"
 
-        for item in grocery_list:
+        for item in self.grocery_list:
             if re.match(pattern, item.name, re.IGNORECASE):
-                matching_items.append(item)  # Add matching items to the list
+                matching_items.append(item)
 
         return matching_items
 
-    def save_data(self):
-            export_list = []
+    def save_data(self) -> None:
+        """
+        Persist the current grocery list to JSON.
 
-            for item in self.grocery_list:
-                export_list.append(vars(item))
+        Note:
+            Using vars(item) writes the object's internal attributes (e.g. _name).
+            A cleaner long-term approach is to add GroceryItem.to_dict() and use that.
+        """
+        export_list: list[dict] = [vars(item) for item in self.grocery_list]
+        utils.save_data(self.grocery_list_path, export_list)
 
-            utils.save_data(self.grocery_list_path, export_list)
+    def load_data(self) -> list[GroceryItem]:
+        """
+        Load grocery list data from JSON and convert entries into GroceryItem objects.
 
-    def load_data(self):
-            grocery_list = []
-            json_data = utils.load_data(self.grocery_list_path)
+        Also normalizes:
+        - legacy keys that start with "_" (e.g. "_buy" -> "buy")
+        - string booleans for buy ("True"/"False") into real bools
+        """
+        grocery_list: list[GroceryItem] = []
+        json_data = utils.load_data(self.grocery_list_path)
 
-            for item in json_data:
-                grocery_item = GroceryItem()
-                for key, value in item.items():
+        for item_dict in json_data:
+            grocery_item = GroceryItem()
 
-                    # Ensure attribute exists
-                    if hasattr(grocery_item, key):
-                        setattr(grocery_item, key, value)
+            for key, value in item_dict.items():
+                # Normalize old JSON keys like "_name" to property names "name".
+                if isinstance(key, str) and key.startswith("_"):
+                    key = key[1:]
 
-                grocery_list.append(grocery_item)
+                # Normalize buy if it was stored as a string in older exports.
+                if key == "buy" and isinstance(value, str):
+                    v = value.strip().lower()
+                    if v in ("true", "yes", "y", "1"):
+                        value = True
+                    elif v in ("false", "no", "n", "0"):
+                        value = False
 
-            return grocery_list
+                # Only set attributes that exist as properties on GroceryItem.
+                if hasattr(grocery_item, key):
+                    setattr(grocery_item, key, value)
+
+            grocery_list.append(grocery_item)
+
+        return grocery_list
