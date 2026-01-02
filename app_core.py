@@ -68,7 +68,7 @@ class GroceryList:
 
     @staticmethod
     def calculate_total_cost(
-        grocery_list: list[object],
+        grocery_list: list["GroceryItem"],
         round_cost: bool = False,
         tax: float = 0.0825,
     ) -> float:
