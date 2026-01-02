@@ -1,3 +1,3 @@
 # 14dc-grocery-app
 
-app for making grocery shopping easier and more efficient
+An app for making grocery shopping easier and more efficient
