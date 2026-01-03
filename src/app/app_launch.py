@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 app_launch.py
 
@@ -9,9 +11,11 @@ This module is responsible for:
 - Delegating all data operations to app_core.GroceryList
 """
 
-import app_core
-import constants
-import utils
+import argparse
+
+from . import app_core
+from . import constants
+from . import utils
 
 
 class Launch:
@@ -21,15 +25,25 @@ class Launch:
         """Initialize the CLI and create the GroceryList application instance."""
         self.grocery_app = app_core.GroceryList()
 
-    def launch(self) -> None:
+    def launch(self, mode="interactive") -> None:
         """
         Start the main CLI loop.
 
         The loop continues until the user enters the "quit" command.
         """
+        if mode == "interactive":
+            self.run_interactive()
+        elif mode == "cli":
+            print("Use CLI mode from main()")
+        elif mode == "ui":
+            pass
+        else:
+            print(f"Unknown mode: {mode}")
+
+    def run_interactive(self):        
         print("")
         print(utils.get_line_delimiter())
-        print("Welcome to the Grocery List app! Let's make shopping easier.")
+        print("Welcome to the Grocery App List Manager!")
         print(utils.get_line_delimiter())
 
         while True:
@@ -44,35 +58,32 @@ class Launch:
             elif command == "edit":
                 self.handle_edit_command()
             elif command == "list":
-                self.grocery_app.list_items(self.grocery_app.grocery_list)
+                self.handle_list_command()
             elif command == "export":
-                self.grocery_app.export_items(self.grocery_app.grocery_list)
+                self.grocery_app.export_items()
             elif command == "search":
                 self.handle_search_command()
             elif command == "quit":
                 break
             else:
-                print(
-                    "Unknown command. Please enter add, remove, edit, list, export, search, or quit."
-                )
+                print("Invalid command. Please try again.")
 
-    def handle_add_command(self) -> None:
-        """Collect inputs for a new item and add it to the grocery list."""
-        print("")
-        print(utils.get_line_delimiter())
-        print("Enter the following information:\n")
+    def handle_add_command(self, args=None) -> None:
+        if args:
+            name = args.name
+            store = args.store
+            cost = args.cost
+            amount = args.amount
+            priority = args.priority
+            buy = args.buy.lower() in constants.BUY_TRUE
+        else:
+            name, store, cost, amount, priority, buy = self.get_inputs()
 
-        name, store, cost, amount, priority, buy = self.get_inputs()
+        self.grocery_app.add_item(name=name, store=store, cost=cost, amount=amount, priority=priority, buy=buy)
 
-        self.grocery_app.add_item(
-            name=name,
-            store=store,
-            cost=cost,
-            amount=amount,
-            priority=priority,
-            buy=buy,
-        )
-        print("\nItem was added to the grocery list.")
+        print(f"{name} was added to the grocery list.")
+        utils.get_line_delimiter()
+
 
     def handle_remove_command(self) -> None:
         """
@@ -162,6 +173,8 @@ class Launch:
             buy,
             id=match_item.id,
         )
+    def handle_list_command(self):
+        self.grocery_app.list_items(self.grocery_app.grocery_list)
 
     def handle_search_command(self) -> None:
         """Search for items by name prefix and print matching results."""
@@ -429,7 +442,50 @@ class Launch:
                 return False
             print("Invalid input. Please enter true|yes OR false|no")
 
+def main():
+    parser = argparse.ArgumentParser(description="Grocery App List Manager")
+    parser.add_argument("--mode", choices=["cli", "ui", "interactive"], default="interactive", help="Choose how to run the app: cli, ui, or interactive (default).")
+
+    subparser = parser.add_subparsers(dest="command")
+    add_parser = subparser.add_parser("add", help="Add new item")
+    add_parser.add_argument("--name", required=True, help="Item name")
+    add_parser.add_argument("--store", default=constants.STORE_DEFAULT, help="Store name")
+    add_parser.add_argument("--cost", type=float, default=constants.COST_DEFAULT, help="Item cost")
+    add_parser.add_argument("--amount", type=int, default=constants.AMOUNT_DEFAULT, help="Quantity")
+    add_parser.add_argument("--priority", type=int, default=constants.PRIORITY_DEFAULT, help="Priority (1-5)")
+    add_parser.add_argument("--buy", type=str, default=str(constants.BUY_DEFAULT), help="Buy now? (yes/no)")
+       
+    add_parser = subparser.add_parser("remove", help="Remove an item")
+    add_parser = subparser.add_parser("edit", help="Edit an item")
+    add_parser = subparser.add_parser("list", help="List all items")
+    add_parser = subparser.add_parser("export", help="Export 'buy' items")
+    add_parser = subparser.add_parser("search", help="Search am item")
+
+    args = parser.parse_args()
+    app = Launch()
+
+    if args.mode == "interactive":
+        app.launch(mode="interactive")
+    elif args.mode == "ui":
+        app.launch(mode="ui")
+    elif args.mode == "cli":
+        if not args.command:
+            print("Please provide a command (Like 'add', 'remove', 'edit', 'list', 'export', or 'search')")
+
+    match args.command:
+        case "add":
+            app.handle_add_command(args)
+        case "remove":
+            app.handle_remove_command()
+        case "edit":
+            app.handle_edit_command()
+        case "list":
+            app.grocery_app.list_items(app.grocery_app.grocery_list)
+        case "export":
+            app.grocery_app.export_items()
+        case "search":
+            app.handle_search_command()
+
 
 if __name__ == "__main__":
-    app = Launch()
-    app.launch()
+    main()

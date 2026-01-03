@@ -14,9 +14,9 @@ import os
 import re
 import uuid
 
-import constants
-import utils
-from grocery_item import GroceryItem
+from . import constants
+from . import utils
+from .grocery_item import GroceryItem
 
 
 class GroceryList:

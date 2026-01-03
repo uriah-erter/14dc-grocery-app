@@ -7,7 +7,7 @@ A GroceryItem stores one entry in the grocery list and validates each field
 through property setters.
 """
 
-import constants
+from . import constants
 
 
 class GroceryItem:
