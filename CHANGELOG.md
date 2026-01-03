@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.2.0] - 2026-01-02
+
+### Added
+
+- Added full CLI argument support using `argparse`, enabling non-interactive commands such as `add`, `list`, `search`, and `export`.
+- Added project packaging support using a modern `src/` layout and `setup.py`.
+- Added executable entry point (`app`) for running the application as an installed command.
+- Added environment-variable support (`GROCERY_APP_DATA_DIR`) to configure the data storage location.
+- Added comprehensive README with installation, usage, and configuration instructions.
+
+### Changed
+
+- Reorganized the project structure to follow modern Python packaging conventions.
+- Updated constants to use immutable data structures where appropriate (e.g. tuples instead of lists).
+- Improved portability by removing hardcoded execution-path assumptions.
+- Refined CLI routing logic to cleanly separate interactive and argument-driven modes.
+
+### Fixed
+
+- Fixed module import errors caused by the transition to a packaged `src/` layout.
+- Fixed CLI invocation issues when running the app as an installed command.
+- Fixed incorrect export paths when running outside the project root.
+
+---
+
 ## [2.1.0] - 2026-01-01
 
 ### Added
@@ -21,10 +46,17 @@
 - Improved error handling and user feedback for invalid edits and missing item IDs.
 - Standardized naming, formatting, and structure across all modules to align with PEP 8 best practices.
 
+### Fixed
+
+- Fixed an issue where a method was accidentally overwritten by a list, causing a `TypeError: 'list' object is not callable`.
+- Fixed edit workflow bugs where blank or falsy inputs were incorrectly applied.
+- Fixed search edge cases caused by unescaped user input in regex patterns.
+
 ### Removed
 
 - Removed unused imports and redundant logic discovered during refactoring.
 - Removed implicit truthy checks that prevented valid boolean updates (e.g. explicitly setting `buy = False`).
+- Removed string-based sentinel values (e.g. `"skip"`) in favor of `None`.
 
 ---
 
