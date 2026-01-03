@@ -7,15 +7,20 @@ This module contains:
 - File paths and filenames
 - Default values for GroceryItem fields
 - Validation boundaries
-- Accepted user-input values
+- Accepted user input values
 """
+
+import os
 
 # -------------------------
 # File system configuration
 # -------------------------
 
 # Directory where all grocery list data and exports are stored
-EXPORT_PATH = "/Users/uriah.erter/14dc_dev/grocery_app_list"
+EXPORT_PATH = os.environ.get(
+    "GROCERY_APP_DATA_DIR",
+    "/Users/uriah.erter/14dc_dev/grocery_app_list",
+)
 
 # Filename for the exported (buy-only) grocery list
 EXPORT_LIST = "export_grocery_list.txt"
@@ -61,10 +66,10 @@ PRIORITY_MAX = 5
 BUY_DEFAULT = True
 
 # Accepted truthy user input (lowercase comparison)
-BUY_TRUE = ["yes", "true"]
+BUY_TRUE = ("yes", "true")
 
 # Accepted falsy user input (lowercase comparison)
-BUY_FALSE = ["no", "false"]
+BUY_FALSE = ("no", "false")
 
 
 # -------------------------

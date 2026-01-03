@@ -3,12 +3,14 @@
 """
 app_launch.py
 
-Command-line interface (CLI) entry point for the Grocery List application.
+Command-line interface (CLI) for the Grocery List application.
 
 This module is responsible for:
-- Displaying the main menu
-- Collecting user input for add/remove/edit/search/export actions
-- Delegating all data operations to app_core.GroceryList
+- Displaying the command prompt/menu
+- Collecting and validating user input
+- Printing user-facing messages
+
+It delegates all business logic and persistence to `app_core.GroceryList`.
 """
 
 import argparse
@@ -19,18 +21,14 @@ from . import utils
 
 
 class Launch:
-    """CLI controller for interacting with the GroceryList application."""
+    """CLI controller that routes user commands to the GroceryList core."""
 
     def __init__(self) -> None:
-        """Initialize the CLI and create the GroceryList application instance."""
+        """Create the GroceryList core instance."""
         self.grocery_app = app_core.GroceryList()
 
-    def launch(self, mode="interactive") -> None:
-        """
-        Start the main CLI loop.
-
-        The loop continues until the user enters the "quit" command.
-        """
+    def launch(self, mode: str = "interactive") -> None:
+        """Run the interactive CLI loop until the user quits."""
         if mode == "interactive":
             self.run_interactive()
         elif mode == "cli":
@@ -40,7 +38,8 @@ class Launch:
         else:
             print(f"Unknown mode: {mode}")
 
-    def run_interactive(self):        
+    def run_interactive(self) -> None:
+        """Run the interactive prompt loop (input-driven mode)."""
         print("")
         print(utils.get_line_delimiter())
         print("Welcome to the Grocery App List Manager!")
@@ -51,6 +50,7 @@ class Launch:
                 "\nEnter a command (add, remove, edit, list, export, search, or quit): "
             ).strip().lower()
 
+            # Route the selected command to the appropriate handler.
             if command == "add":
                 self.handle_add_command()
             elif command == "remove":
@@ -68,7 +68,8 @@ class Launch:
             else:
                 print("Invalid command. Please try again.")
 
-    def handle_add_command(self, args=None) -> None:
+    def handle_add_command(self, args: argparse.Namespace | None = None) -> None:
+        """Prompt for item fields and add a new item."""
         if args:
             name = args.name
             store = args.store
@@ -100,6 +101,7 @@ class Launch:
             print(f"I'm sorry, I could not find a match for '{name}'.")
             return
 
+        # If multiple matches exist, let the user choose which item to remove.
         if len(matches) > 1:
             for match_num, match in enumerate(matches, start=1):
                 match_string = (
@@ -126,6 +128,7 @@ class Launch:
         self.grocery_app.remove_item(name, id=match_item.id)
         print("That item has been removed.")
 
+
     def handle_edit_command(self) -> None:
         """
         Edit an existing item.
@@ -143,6 +146,7 @@ class Launch:
             print(f"\nI'm sorry, I could not find a match for '{target_item}'.\n")
             return
 
+        # If multiple matches exist, let the user choose which item to edit.
         if len(matches) > 1:
             for match_num, match in enumerate(matches, start=1):
                 print(
@@ -173,8 +177,12 @@ class Launch:
             buy,
             id=match_item.id,
         )
-    def handle_list_command(self):
+
+
+    def handle_list_command(self) -> None:
+        """List all items currently in the grocery list."""
         self.grocery_app.list_items(self.grocery_app.grocery_list)
+
 
     def handle_search_command(self) -> None:
         """Search for items by name prefix and print matching results."""
@@ -205,12 +213,8 @@ class Launch:
     # Input helpers (ADD workflow)
     # ----------------------------
 
-    def get_inputs(self):
-        """
-        Collect inputs for adding a new item.
-
-        This method applies defaults when the user leaves a field blank.
-        """
+    def get_inputs(self) -> tuple[str, str, float, int, int, bool]:
+        """Collect add-workflow inputs (blank uses defaults)."""
         name = self.get_name_input()
         print(utils.get_line_delimiter())
         print("")
@@ -334,12 +338,8 @@ class Launch:
     # Input helpers (EDIT workflow)
     # -----------------------------
 
-    def get_inputs_edit(self):
-        """
-        Collect inputs for editing an existing item.
-
-        Blank input returns None, which signals "keep the current value".
-        """
+    def get_inputs_edit(self) -> tuple[str | None, str | None, float | None, int | None, int | None, bool | None]:
+        """Collect edit-workflow inputs (blank keeps current values)."""
         name = self.get_name_input_edit()
         print(utils.get_line_delimiter())
         print("")
@@ -367,21 +367,21 @@ class Launch:
         return name, store, cost, amount, priority, buy
 
     @staticmethod
-    def get_name_input_edit():
+    def get_name_input_edit() -> str | None:
         """Get item name for EDIT. Blank returns None (keep current)."""
         print("Enter a name for the item (press Enter to keep current).")
         name = input("Item name: ").strip()
         return None if name == "" else name
 
     @staticmethod
-    def get_store_input_edit():
+    def get_store_input_edit() -> str | None:
         """Get store name for EDIT. Blank returns None (keep current)."""
         print("Enter the store name (press Enter to keep current).")
         store = input("Store name: ").strip()
         return None if store == "" else store
 
     @staticmethod
-    def get_cost_input_edit():
+    def get_cost_input_edit() -> float | None:
         """Get item cost for EDIT. Blank returns None (keep current)."""
         print("Enter the cost (press Enter to keep current).")
         while True:
@@ -394,7 +394,7 @@ class Launch:
                 print("Invalid input. Please enter a valid price.")
 
     @staticmethod
-    def get_amount_input_edit():
+    def get_amount_input_edit() -> int | None:
         """Get item amount for EDIT. Blank returns None (keep current)."""
         print("Enter the quantity (press Enter to keep current).")
         while True:
@@ -410,7 +410,7 @@ class Launch:
                 print("Invalid input. Please enter a valid quantity.")
 
     @staticmethod
-    def get_priority_input_edit():
+    def get_priority_input_edit() -> int | None:
         """Get item priority for EDIT. Blank returns None (keep current)."""
         p_min = constants.PRIORITY_MIN
         p_max = constants.PRIORITY_MAX
@@ -429,7 +429,7 @@ class Launch:
                 print(f"Invalid input. Please enter a number between {p_min}-{p_max}.")
 
     @staticmethod
-    def get_buy_input_edit():
+    def get_buy_input_edit() -> bool | None:
         """Get buy flag for EDIT. Blank returns None (keep current)."""
         print("Enter buy yes/no (press Enter to keep current).")
         while True:
@@ -442,9 +442,18 @@ class Launch:
                 return False
             print("Invalid input. Please enter true|yes OR false|no")
 
+
+
+
 def main():
+    """Parse CLI arguments and route commands to the application."""
     parser = argparse.ArgumentParser(description="Grocery App List Manager")
-    parser.add_argument("--mode", choices=["cli", "ui", "interactive"], default="interactive", help="Choose how to run the app: cli, ui, or interactive (default).")
+    parser.add_argument(
+        "--mode",
+        choices=["cli", "ui", "interactive"],
+        default="interactive",
+        help="Choose how to run the app: cli, ui, or interactive (default)."
+    )
 
     subparser = parser.add_subparsers(dest="command")
     add_parser = subparser.add_parser("add", help="Add new item")
@@ -454,12 +463,12 @@ def main():
     add_parser.add_argument("--amount", type=int, default=constants.AMOUNT_DEFAULT, help="Quantity")
     add_parser.add_argument("--priority", type=int, default=constants.PRIORITY_DEFAULT, help="Priority (1-5)")
     add_parser.add_argument("--buy", type=str, default=str(constants.BUY_DEFAULT), help="Buy now? (yes/no)")
-       
+
     add_parser = subparser.add_parser("remove", help="Remove an item")
     add_parser = subparser.add_parser("edit", help="Edit an item")
     add_parser = subparser.add_parser("list", help="List all items")
     add_parser = subparser.add_parser("export", help="Export 'buy' items")
-    add_parser = subparser.add_parser("search", help="Search am item")
+    add_parser = subparser.add_parser("search", help="Search an item")
 
     args = parser.parse_args()
     app = Launch()
