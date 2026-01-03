@@ -66,10 +66,10 @@ PRIORITY_MAX = 5
 BUY_DEFAULT = True
 
 # Accepted truthy user input (lowercase comparison)
-BUY_TRUE = ("yes", "true")
+BUY_TRUE = ("yes", "true", "y", "1")
 
 # Accepted falsy user input (lowercase comparison)
-BUY_FALSE = ("no", "false")
+BUY_FALSE = ("no", "false", "n", "0")
 
 
 # -------------------------

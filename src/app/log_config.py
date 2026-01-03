@@ -1,7 +1,7 @@
 import logging
 import os
 
-import constants
+import app.constants as constants
 
 os.makedirs(constants.EXPORT_PATH, exist_ok=True)
 log_file_name = os.path.join(constants.EXPORT_PATH, 'grocery_logger.log')

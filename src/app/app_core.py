@@ -18,13 +18,17 @@ import os
 import re
 import uuid
 
-from . import constants
-from . import utils
-from .grocery_item import GroceryItem
+import app.constants as constants
+import app.utils as utils
+from app.grocery_item import GroceryItem
 
 
 class GroceryList:
     """Manage grocery list items, persistence, search, and export operations."""
+
+    # -------------------------
+    # Init / load
+    # -------------------------
 
     def __init__(self) -> None:
         """Initialize paths, load the grocery list from disk (or create a new file)."""
@@ -58,6 +62,10 @@ class GroceryList:
         self.grocery_list = grocery_list
         return self.grocery_list
 
+    # -------------------------
+    # Lookup helpers
+    # -------------------------
+
     def get_index_from_id(self, item_id: int) -> int | None:
         """Return the index for a given item ID, or None if not found."""
         for index, item in enumerate(self.grocery_list):
@@ -72,31 +80,9 @@ class GroceryList:
                 return index
         return None
 
-    @staticmethod
-    def calculate_total_cost(
-        grocery_list: list[GroceryItem],
-        round_cost: bool = False,
-        tax: float = 0.0825,
-    ) -> float:
-        """Calculate total cost for a list of items.
-
-        Args:
-            grocery_list: Items to total.
-            round_cost: If True, round subtotal before tax.
-            tax: Tax rate to apply (use 0 to disable).
-
-        Returns:
-            Total cost including tax.
-        """
-        total_cost = sum(item.amount * item.cost for item in grocery_list)
-
-        if round_cost:
-            total_cost = round(total_cost)
-
-        if tax:
-            total_cost += total_cost * tax
-
-        return total_cost
+    # -------------------------
+    # CRUD
+    # -------------------------
 
     def add_item(
         self,
@@ -160,16 +146,12 @@ class GroceryList:
 
         if name is not None:
             current_item.name = name
-
         if store is not None:
             current_item.store = store
-
         if cost is not None:
             current_item.cost = cost
-
         if amount is not None:
             current_item.amount = amount
-
         if priority is not None:
             current_item.priority = priority
 
@@ -179,8 +161,31 @@ class GroceryList:
 
         self.save_data()
 
-    def list_items(self, grocery_list: list[GroceryItem]) -> None:
+    # -------------------------
+    # Search
+    # -------------------------
+
+    def search_item_name(self, search_item: str) -> list[GroceryItem]:
+        """Return items whose names start with the search string (case-insensitive)."""
+        matching_items: list[GroceryItem] = []
+        pattern = rf"^{re.escape(search_item)}"
+
+        for item in self.grocery_list:
+            if re.match(pattern, item.name, re.IGNORECASE):
+                matching_items.append(item)
+
+        return matching_items
+
+    # -------------------------
+    # Display / export
+    # -------------------------
+
+    def list_items(self, grocery_list: list[GroceryItem] | None = None) -> None:
         """Print a formatted list of items to stdout."""
+        if grocery_list is None:
+            grocery_list = self.grocery_list
+
+        print("")
         for match_num, item in enumerate(grocery_list, start=1):
             match_string = (
                 f"{match_num}. "
@@ -192,16 +197,21 @@ class GroceryList:
                 f"Buy: {item.buy}"
             )
             print(match_string)
+        print("")
 
-    def export_items(self, grocery_list: list[GroceryItem]) -> None:
+    def export_items(self, grocery_list: list[GroceryItem] | None = None) -> None:
         """Write items marked for purchase (buy=True) to the export text file."""
+        if grocery_list is None:
+            grocery_list = self.grocery_list
+
         buy_list = [item for item in grocery_list if item.buy is True]
 
         if not buy_list:
             print("No items to export.")
             return
 
-        exported_list_file = os.path.join(constants.EXPORT_PATH, constants.EXPORT_LIST)
+        exported_list_file = os.path.join(
+            constants.EXPORT_PATH, constants.EXPORT_LIST)
 
         with open(exported_list_file, "w") as file:
             file.write("\n** Grocery List Export ** \n\n")
@@ -225,16 +235,9 @@ class GroceryList:
 
         print(f"Grocery list exported to {exported_list_file}")
 
-    def search_item_name(self, search_item: str) -> list[GroceryItem]:
-        """Return items whose names start with the search string (case-insensitive)."""
-        matching_items: list[GroceryItem] = []
-        pattern = rf"^{re.escape(search_item)}"
-
-        for item in self.grocery_list:
-            if re.match(pattern, item.name, re.IGNORECASE):
-                matching_items.append(item)
-
-        return matching_items
+    # -------------------------
+    # Persistence
+    # -------------------------
 
     def save_data(self) -> None:
         """Persist the current grocery list to JSON.
@@ -276,3 +279,24 @@ class GroceryList:
             grocery_list.append(grocery_item)
 
         return grocery_list
+
+    # -------------------------
+    # Utilities
+    # -------------------------
+
+    @staticmethod
+    def calculate_total_cost(
+        grocery_list: list[GroceryItem],
+        round_cost: bool = False,
+        tax: float = 0.0825,
+    ) -> float:
+        """Calculate total cost for a list of items."""
+        total_cost = sum(item.amount * item.cost for item in grocery_list)
+
+        if round_cost:
+            total_cost = round(total_cost)
+
+        if tax:
+            total_cost += total_cost * tax
+
+        return total_cost
