@@ -26,7 +26,7 @@ CLI entry points, and comprehensive documentation.
 
 ## Project Structure
 
-```text
+```
 src/
 └── app/
     ├── app_core.py       # Core business logic and persistence
@@ -47,23 +47,23 @@ src/
 - Python 3.10+
 - macOS or Linux (Windows should work with minor adjustments)
 
-### 1. Clone the repository
+### Clone the repository
 
-```bash
+```
 git clone https://github.com/uriah-erter/14dc-grocery-app.git
 cd 14dc-grocery-app
 ```
 
-### 2. Create and activate a virtual environment
+### Create and activate a virtual environment
 
-```bash
+```
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install the application in editable mode
+### Install the application
 
-```bash
+```
 pip install -e .
 ```
 
@@ -75,17 +75,17 @@ This installs the `app` command as an executable entry point.
 
 ### Interactive Mode (Default)
 
-```bash
+```
 app
 ```
 
-or explicitly:
+or:
 
-```bash
+```
 app --mode interactive
 ```
 
-You will be prompted to enter commands such as:
+Available commands:
 
 ```
 add, remove, edit, list, search, export, quit
@@ -95,47 +95,84 @@ add, remove, edit, list, search, export, quit
 
 ### CLI Mode (Non-interactive)
 
-CLI mode allows commands to be executed directly without prompts.
+CLI mode allows direct execution of commands without prompts.
 
-#### Add an item
+If `--mode cli` is provided without a subcommand, the help menu is displayed.
 
-```bash
-app --mode cli add \
-  --name "Hot Dog" \
-  --store "Costco" \
-  --cost 1.50 \
-  --amount 2 \
-  --priority 1 \
-  --buy yes
+---
+
+### Add an item
+
+```
+app --mode cli add   --name "Hot Dog"   --store "Costco"   --cost 1.50   --amount 2   --priority 1   --buy yes
 ```
 
-#### List all items
+Accepted values for `--buy`:
 
-```bash
+```
+yes, no
+true, false
+y, n
+1, 0
+```
+
+---
+
+### List all items
+
+```
 app --mode cli list
 ```
 
-#### Export items marked for purchase
+---
 
-```bash
-app --mode cli export
+### Search for items
+
+```
+app --mode cli search Ice Cream
 ```
 
-#### Search for items
+---
 
-```bash
-app --mode cli search
+### Remove an item
+
 ```
+app --mode cli remove Hot Dog
+```
+
+---
+
+### Edit an item
+
+```
+app --mode cli edit Chicken Breast --cost 5.99 --buy no
+```
+
+If multiple items match, the command will prompt for an `--id`.
+
+---
+
+## Multi-word Item Names
+
+Multi-word item names work naturally in CLI commands:
+
+```
+app --mode cli remove Ice Cream
+app --mode cli search Chicken Breast
+app --mode cli edit Hot Dog --priority 2
+```
+
+Quoted strings are also supported.
 
 ---
 
 ## Environment Configuration
 
-By default, data is stored in a local directory defined in `constants.py`.
+The application stores data in a configurable directory.
 
-You can override this location using an environment variable:
+Set the location using an environment variable:
 
-```bash
+```
 export GROCERY_APP_DATA_DIR="$HOME/.grocery_app"
 ```
 
@@ -149,8 +186,8 @@ This controls where:
 ## Data Persistence
 
 - Grocery items are stored as JSON on disk
-- Items marked with `buy = True` can be exported to a separate text file
-- Legacy data formats are normalized automatically on load
+- Items marked with `buy = True` are exported to a text file
+- Legacy data is normalized automatically:
   - Private keys (e.g. `_name`) are converted
   - String booleans are converted to real booleans
 
@@ -158,18 +195,18 @@ This controls where:
 
 ## Design Notes
 
-- **`app_core.py`** contains all business logic and persistence
-- **`app_launch.py`** handles user interaction and argument parsing
-- **`grocery_item.py`** enforces validation via property setters
-- Methods that do not rely on instance state are implemented as `@staticmethod`
-- Edit workflows use `None` as a sentinel value to retain existing data
+- `app_core.py` contains all business logic and persistence
+- `app_launch.py` handles CLI interaction and argument parsing
+- `grocery_item.py` enforces validation via property setters
+- Static methods are used where instance state is not required
+- Edit workflows use `None` to retain existing values
 
 ---
 
 ## Development Status
 
-This project is actively developed as a learning and portfolio project, with an
-emphasis on:
+This project is actively developed as a learning and portfolio project with a
+focus on:
 
 - clean architecture
 - readability

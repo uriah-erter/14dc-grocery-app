@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.3.0] – 2026-01-03
+
+### Added
+
+- Added support for positional, multi-word item names across CLI commands (`remove`, `edit`, `search`) without requiring flag names.
+- Added centralized and reusable buy-flag parsing logic supporting `yes/no`, `true/false`, `y/n`, and `1/0`.
+- Added argparse `choices` validation for `--buy` flags to prevent invalid input before runtime.
+- Added automatic help display when running `--mode cli` without a subcommand.
+
+### Changed
+
+- Reordered methods in `app_launch.py` and `app_core.py` to improve logical flow and maintainability.
+- Refined CLI execution flow to cleanly separate:
+  - interactive mode
+  - CLI command execution
+  - argument validation and dispatch
+- Improved consistency between interactive and CLI behaviors for add, edit, remove, and search operations.
+
+### Improved
+
+- Overall CLI user experience by allowing natural commands such as:
+  - `app --mode cli remove Hot Dog`
+  - `app --mode cli search Ice Cream`
+- Readability and structure of the CLI controller (`Launch`) by grouping handlers, helpers, and entry points.
+- Robustness of argument parsing and error handling for ambiguous item matches.
+
+### Fixed
+
+- Fixed issues where quoted multi-word search terms behaved inconsistently between interactive and CLI modes.
+- Fixed edge cases where invalid `--buy` values could bypass validation.
+- Fixed minor UX issues when CLI mode was invoked without a command.
+
+---
+
 ## [2.2.0] - 2026-01-02
 
 ### Added
